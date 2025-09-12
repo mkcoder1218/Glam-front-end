@@ -39,7 +39,7 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <Scissors className="h-8 w-8 text-primary" />
+              <img src="/logo.png" alt="Glam Nest" className="h-8 w-8 rounded-full" />
               <span className="font-bold text-xl text-foreground">Glam Nest</span>
             </Link>
             <div className="hidden md:flex items-center space-x-8">
@@ -57,7 +57,7 @@ export function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Scissors className="h-8 w-8 text-primary" />
+            <img src="/logo.jpg" alt="Glam Nest" className="h-10 rounded-full w-10" />
             <span className="font-bold text-xl text-foreground">Glam Nest</span>
           </Link>
 

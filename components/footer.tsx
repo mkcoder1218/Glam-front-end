@@ -9,7 +9,7 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Scissors className="h-8 w-8 text-primary" />
+              <img src="/logo.jpg" alt="Glam Nest" className="h-8 w-8 rounded-full" />
               <span className="font-bold text-xl text-foreground">Glam Nest</span>
             </Link>
             <p className="text-muted-foreground mb-4 max-w-md">
