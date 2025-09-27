@@ -9,6 +9,10 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Suspense } from "react"
 import { LanguageProvider } from "@/components/language-provider"
 import "./globals.css"
+import { Toaster } from "@/components/ui/toaster"
+import { Provider } from "react-redux"
+import { store } from "@/store/store"
+import { ClientProviders } from "./client"
 
 export const metadata: Metadata = {
   title: "Glam Nest - Luxury Hair Styling & Beauty Sanctuary",
@@ -25,8 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+        <ClientProviders>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange={false}>
           <LanguageProvider>
+            <Toaster/>
             <div className="min-h-screen flex flex-col">
               <Suspense fallback={<div>Loading...</div>}>
                 <Navigation />
@@ -39,7 +45,9 @@ export default function RootLayout({
           </LanguageProvider>
         </ThemeProvider>
         <Analytics />
+      </ClientProviders>
       </body>
+
     </html>
   )
 }

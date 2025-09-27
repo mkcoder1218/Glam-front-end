@@ -57,6 +57,48 @@ const translations = {
     readyToTransform: "Ready to Transform?",
     experienceFuture: "Experience the future of beauty and wellness. Book your complete makeover today.",
     callNumber: "Call (555) 123-4567",
+
+    // Authentication
+    welcomeBack: "Welcome Back",
+    signInAccount: "Sign in to your account",
+    continueBeautyJourney: "Continue your beauty journey with us",
+    login: "Login",
+    emailAddress: "Email Address",
+    enterEmail: "Enter your email",
+    password: "Password",
+    enterPassword: "Enter your password",
+    rememberMe: "Remember me",
+    forgotPassword: "Forgot password?",
+    signIn: "Sign In",
+    signingIn: "Signing in...",
+    orContinueWith: "or continue with",
+    dontHaveAccount: "Don't have an account?",
+    signUp: "Sign Up",
+    backToHome: "Back to Home",
+    
+    joinCommunity: "Join Our Community",
+    createAccount: "Create your account",
+    startBeautyJourney: "Start your beauty journey today",
+    firstName: "First Name",
+    lastName: "Last Name",
+    enterFirstName: "Enter first name",
+    enterLastName: "Enter last name",
+    phoneNumber: "Phone Number",
+    enterPhone: "Enter phone number",
+    confirmPassword: "Confirm Password",
+    passwordRequirements: "Password Requirements",
+    minLength: "8+ characters",
+    uppercase: "Uppercase letter",
+    lowercase: "Lowercase letter",
+    number: "Number",
+    passwordsDontMatch: "Passwords don't match",
+    agreeToTerms: "I agree to the",
+    termsAndConditions: "Terms and Conditions",
+    and: "and",
+    privacyPolicy: "Privacy Policy",
+    subscribeNewsletter: "Subscribe to newsletter for beauty tips and offers",
+    creatingAccount: "Creating account...",
+    alreadyHaveAccount: "Already have an account?",
   },
   am: {
     // Navigation
@@ -103,6 +145,48 @@ const translations = {
     readyToTransform: "ለመለወጥ ዝግጁ ነዎት?",
     experienceFuture: "የወደፊቱን የውበት እና ጤንነት ይለማመዱ። ዛሬ ሙሉ ለሙሉ የመለወጥ ሂደትዎን ይመዝገቡ።",
     callNumber: "ይደውሉ (555) 123-4567",
+
+    // Authentication
+    welcomeBack: "እንኳን ተመለሱ",
+    signInAccount: "መለያዎ ውስጥ ይግቡ",
+    continueBeautyJourney: "የውበት ጉዞዎን ከእኛ ጋር ይቀጥሉ",
+    login: "መግቢያ",
+    emailAddress: "የኢሜይል አድራሻ",
+    enterEmail: "ኢሜይልዎን ያስገቡ",
+    password: "የይለፍ ቃል",
+    enterPassword: "የይለፍ ቃልዎን ያስገቡ",
+    rememberMe: "አስታውሰኝ",
+    forgotPassword: "የይለፍ ቃል ረሱ?",
+    signIn: "ግባ",
+    signingIn: "በመግባት ላይ...",
+    orContinueWith: "ወይም በመጠቀም ይቀጥሉ",
+    dontHaveAccount: "መለያ የለዎትም?",
+    signUp: "ይመዝገቡ",
+    backToHome: "ወደ ቤት ተመለስ",
+    
+    joinCommunity: "ማህበረሰባችንን ይቀላቀሉ",
+    createAccount: "መለያዎን ይፍጠሩ",
+    startBeautyJourney: "የውበት ጉዞዎን ዛሬ ይጀምሩ",
+    firstName: "የመጀመሪያ ስም",
+    lastName: "የአባት ስም",
+    enterFirstName: "የመጀመሪያ ስም ያስገቡ",
+    enterLastName: "የአባት ስም ያስገቡ",
+    phoneNumber: "ስልክ ቁጥር",
+    enterPhone: "ስልክ ቁጥር ያስገቡ",
+    confirmPassword: "የይለፍ ቃል አረጋግጥ",
+    passwordRequirements: "የይለፍ ቃል መስፈርቶች",
+    minLength: "8+ ቁምፊዎች",
+    uppercase: "ትልቅ ፊደል",
+    lowercase: "ትንሽ ፊደል",
+    number: "ቁጥር",
+    passwordsDontMatch: "የይለፍ ቃሎች አይመሳሰሉም",
+    agreeToTerms: "እስማማለሁ",
+    termsAndConditions: "ውሎች እና ሁኔታዎች",
+    and: "እና",
+    privacyPolicy: "የግላዊነት ፖሊሲ",
+    subscribeNewsletter: "ለውበት ምክሮች እና አቅርቦቶች ኒውዝሌተር ይመዝገቡ",
+    creatingAccount: "መለያ በመፍጠር ላይ...",
+    alreadyHaveAccount: "አስቀድሞ መለያ አለዎት?",
   },
 }
 
@@ -112,13 +196,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en")
 
   const handleSetLanguage = (lang: Language) => {
-    console.log("[v0] Language changing from", language, "to", lang)
     setLanguage(lang)
   }
 
   const t = (key: string): string => {
     const translation = translations[language][key as keyof (typeof translations)["en"]] || key
-    console.log("[v0] Translation for", key, "in", language, ":", translation)
     return translation
   }
 
