@@ -17,7 +17,6 @@ const navItems = [
   { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
   { name: "Gallery", href: "/gallery" },
-  { name: "Booking", href: "/booking" },
 ];
 
 export function Navigation() {
@@ -54,12 +53,12 @@ export function Navigation() {
     if (logoRef.current) {
       gsap.fromTo(
         logoRef.current,
-        { scale: 0, rotation: -180 },
+        { scale: 0, transformOrigin: "center" },
         {
           scale: 1,
           rotation: 0,
           duration: 0.8,
-          ease: "back.out(1.7)",
+          ease: "back.out(1)",
           delay: 0.2,
         }
       );
