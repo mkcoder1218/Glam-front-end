@@ -17,6 +17,7 @@ import {
   PersistConfig,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage
+import { roleSLice } from './slice/role';
 
 // Helper function to wrap any slice reducer with persist
 const createPersistedReducer = (key: string, reducer: Reducer, whitelist: string[] = []) => {
@@ -36,6 +37,7 @@ export const store = configureStore({
     serviceCategory: serviceCategorySlice.reducer, // not persisted
     booking: bookingSlice.reducer, // not persisted
     bookingServices: bookingServicesSlice.reducer, // not persisted
+    role:roleSLice.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

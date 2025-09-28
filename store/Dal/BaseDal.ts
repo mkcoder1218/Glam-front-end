@@ -54,6 +54,7 @@ export function createEntityApi<T extends { id: any }, S = T>(
         const { data } = await apiClient.post(`/auth/register`, item);
         dismissToast(toastId as string);
         showSuccessToast(`${entityName} created successfully!`);
+        
         return data;
       } catch (error) {
         dismissToast(toastId as string);

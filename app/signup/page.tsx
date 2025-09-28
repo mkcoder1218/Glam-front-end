@@ -35,11 +35,12 @@ export default function SignupPage() {
   })
   
   // Find User role and set it automatically
+  console.log('roleState?.items',formData)
   useEffect(() => {
-    if (roleState?.items?.length > 0) {
-      const userRole = roleState.items.find((role: any) => role.name === "User")
+    if (roleState?.items?.data?.length > 0) {
+      const userRole = roleState.items?.data?.find((role: any) => role.name === "User")
       if (userRole) {
-        setFormData(prev => ({ ...prev, role_id: userRole.id }))
+        setFormData(prev => ({ ...prev, role_id: userRole?.id }))
       }
     }
   }, [roleState?.items])
