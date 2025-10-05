@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-  baseURL: 'http://91.98.46.158:3002/api', // dynamic base URL
+  baseURL: 'https://shaft-usd-respiratory-narrow.trycloudflare.com/api', // dynamic base URL
   headers: {
     'Content-Type': 'application/json',
   },
