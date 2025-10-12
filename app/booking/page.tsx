@@ -28,13 +28,22 @@ export default function BookingPage() {
   // People & services
   const [numPeople, setNumPeople] = useState(1)
   const [peopleServices, setPeopleServices] = useState<
-    Record<number, { personType: "Adult" | "Child"; selectedServices: Record<string, number> }>
+    Record<number, { 
+      personType: "Adult" | "Child"; 
+      selectedServices: Record<string, number>;
+      selectedCategory: string | null;
+      selectedType: string | null;
+    }>
   >({
-    1: { personType: "Adult", selectedServices: {} }
+    1: { 
+      personType: "Adult", 
+      selectedServices: {},
+      selectedCategory: null,
+      selectedType: null
+    }
   })
-  // Category + type + pagination
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedType, setSelectedType] = useState<string | null>(null)
+  
+  // Global filters for pagination
   const [page, setPage] = useState(1)
   const limit = 10
 
@@ -71,20 +80,36 @@ export default function BookingPage() {
     dispatch(serviceTypeSlice.actions.fetchAllCategorytype())
   }, [dispatch])
 
-  // Fetch services
+  // Fetch services with combined filters from all people
   useEffect(() => {
-    const filters = {
-      ...(selectedCategory ? { category_id: selectedCategory } : {}),
-      ...(selectedType ? { type_id: selectedType } : {}),
+    // Combine filters from all people
+    const allCategoryIds = Object.values(peopleServices)
+      .map(person => person.selectedCategory)
+      .filter(Boolean) as string[]
+    
+    const allTypeIds = Object.values(peopleServices)
+      .map(person => person.selectedType)
+      .filter(Boolean) as string[]
+
+    const filters: any = {}
+    
+    // If any person has selected categories/types, apply them as OR filters
+    if (allCategoryIds.length > 0) {
+      filters.category_id = allCategoryIds
     }
+    
+    if (allTypeIds.length > 0) {
+      filters.type_id = allTypeIds
+    }
+
     const query = encodeQuery({
-      filters,
+      filters: Object.keys(filters).length > 0 ? filters : {},
       limit,
       offset: (page - 1) * limit,
       include: [{ model: "File", as: "File" }],
     })
     dispatch(serviceSlice.actions.fetchAllServices(query))
-  }, [selectedCategory, selectedType, page, dispatch])
+  }, [peopleServices, page, dispatch])
 
   // Animate on step change
   useEffect(() => {
@@ -99,7 +124,12 @@ export default function BookingPage() {
   // Handlers
   const handleServiceToggle = (personIndex: number, serviceId: string) => {
     setPeopleServices((prev) => {
-      const current = prev[personIndex] || { personType: "Adult" as const, selectedServices: {} }
+      const current = prev[personIndex] || { 
+        personType: "Adult" as const, 
+        selectedServices: {},
+        selectedCategory: null,
+        selectedType: null
+      }
       const selectedServices = { ...current.selectedServices }
       if (selectedServices[serviceId]) {
         delete selectedServices[serviceId]
@@ -137,6 +167,29 @@ export default function BookingPage() {
         personType: type,
       },
     }))
+  }
+
+  const handleCategoryChange = (personIndex: number, categoryId: string | null) => {
+    setPeopleServices((prev) => ({
+      ...prev,
+      [personIndex]: {
+        ...prev[personIndex],
+        selectedCategory: categoryId,
+        selectedType: null, // Reset type when category changes
+      },
+    }))
+    setPage(1) // Reset to first page when filters change
+  }
+
+  const handleTypeChange = (personIndex: number, typeId: string | null) => {
+    setPeopleServices((prev) => ({
+      ...prev,
+      [personIndex]: {
+        ...prev[personIndex],
+        selectedType: typeId,
+      },
+    }))
+    setPage(1) // Reset to first page when filters change
   }
 
   const handleNext = () => {
@@ -184,7 +237,6 @@ export default function BookingPage() {
         status: "Pending",
         service_details: {
           adultNumber: numAdults,
-          childNumber: numPeople - numAdults,
           serviceIds: Array.from(allServiceIds),
         },
       }
@@ -224,6 +276,18 @@ export default function BookingPage() {
     }
   }
 
+  // Get filtered services for a specific person based on their filters
+  const getFilteredServicesForPerson = (personIndex: number) => {
+    const person = peopleServices[personIndex]
+    if (!person) return services
+
+    return services.filter((service: any) => {
+      const categoryMatch = !person.selectedCategory || service.category_id === person.selectedCategory
+      const typeMatch = !person.selectedType || service.type_id === person.selectedType
+      return categoryMatch && typeMatch
+    })
+  }
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -246,9 +310,19 @@ export default function BookingPage() {
                 onValueChange={(val) => {
                   const n = parseInt(val)
                   setNumPeople(n)
-                  const updated: Record<number, { personType: "Adult" | "Child"; selectedServices: Record<string, number> }> = {}
+                  const updated: Record<number, { 
+                    personType: "Adult" | "Child"; 
+                    selectedServices: Record<string, number>;
+                    selectedCategory: string | null;
+                    selectedType: string | null;
+                  }> = {}
                   for (let i = 1; i <= n; i++) {
-                    updated[i] = peopleServices[i] || { personType: "Adult" as const, selectedServices: {} }
+                    updated[i] = peopleServices[i] || { 
+                      personType: "Adult" as const, 
+                      selectedServices: {},
+                      selectedCategory: null,
+                      selectedType: null
+                    }
                   }
                   setPeopleServices(updated)
                 }}
@@ -265,59 +339,18 @@ export default function BookingPage() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Category filter */}
-            <div className="flex justify-end mb-4">
-              <Select
-                value={selectedCategory ?? "all"}
-                onValueChange={(value) => {
-                  setSelectedCategory(value === "all" ? null : value)
-                  setSelectedType(null)
-                  setPage(1)
-                }}
-              >
-                <SelectTrigger className="w-56 border-primary/30 focus:ring-primary">
-                  <SelectValue placeholder="Filter by Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((cat: any) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Type filter */}
-            {selectedCategory && (
-              <div className="flex justify-end mb-4">
-                <Select
-                  value={selectedType ?? "all"}
-                  onValueChange={(value) => {
-                    setSelectedType(value === "all" ? null : value)
-                    setPage(1)
-                  }}
-                >
-                  <SelectTrigger className="w-56 border-primary/30 focus:ring-primary">
-                    <SelectValue placeholder="Filter by Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    {serviceTypes
-                      .filter((t: any) => t.service_category_id === selectedCategory)
-                      .map((t: any) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            
             {/* Services per person */}
             {[...Array(numPeople)].map((_, i) => {
               const personIndex = i + 1
-              const person = peopleServices[personIndex] || { personType: "Adult" as const, selectedServices: {} }
+              const person = peopleServices[personIndex] || { 
+                personType: "Adult" as const, 
+                selectedServices: {},
+                selectedCategory: null,
+                selectedType: null
+              }
+              const personServices = getFilteredServicesForPerson(personIndex)
+              
               return (
                 <div key={i} className="mb-8">
                   <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 rounded-t-2xl shadow-lg mb-4">
@@ -326,27 +359,76 @@ export default function BookingPage() {
                       Person {personIndex}
                     </h3>
                   </div>
-                  {/* Person type */}
-                  <div className="flex gap-4 mb-4 p-4 bg-white rounded-xl shadow-sm border">
-                    {(["Adult", "Child"] as const).map((type) => (
-                      <label key={type} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-primary/5 transition-colors">
-                        <input
-                          type="radio"
-                          name={`person-type-${personIndex}`}
-                          value={type}
-                          checked={person.personType === type}
-                          onChange={() => handlePersonTypeChange(personIndex, type)}
-                          className="text-primary focus:ring-primary"
-                        />
-                        <span className={person.personType === type ? "font-semibold text-primary" : ""}>
-                          {type}
-                        </span>
-                      </label>
-                    ))}
+                  
+                  {/* Person type and filters */}
+                  <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-white rounded-xl shadow-sm border">
+                    {/* Person type */}
+                    <div className="flex gap-4">
+                      {(["Adult", "Child"] as const).map((type) => (
+                        <label key={type} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-primary/5 transition-colors">
+                          <input
+                            type="radio"
+                            name={`person-type-${personIndex}`}
+                            value={type}
+                            checked={person.personType === type}
+                            onChange={() => handlePersonTypeChange(personIndex, type)}
+                            className="text-primary focus:ring-primary"
+                          />
+                          <span className={person.personType === type ? "font-semibold text-primary" : ""}>
+                            {type}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    
+                    {/* Category filter for this person */}
+                    <div className="flex-1">
+                      <Select
+                        value={person.selectedCategory ?? "all"}
+                        onValueChange={(value) => handleCategoryChange(personIndex, value === "all" ? null : value)}
+                      >
+                        <SelectTrigger className="w-full border-primary/30 focus:ring-primary">
+                          <SelectValue placeholder="Filter by Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {categories.map((cat: any) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Type filter for this person */}
+                    {person.selectedCategory && (
+                      <div className="flex-1">
+                        <Select
+                          value={person.selectedType ?? "all"}
+                          onValueChange={(value) => handleTypeChange(personIndex, value === "all" ? null : value)}
+                        >
+                          <SelectTrigger className="w-full border-primary/30 focus:ring-primary">
+                            <SelectValue placeholder="Filter by Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            {serviceTypes
+                              .filter((t: any) => t.service_category_id === person.selectedCategory)
+                              .map((t: any) => (
+                                <SelectItem key={t.id} value={t.id}>
+                                  {t.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
-                  {/* Services grid */}
+                  
+                  {/* Services grid for this person */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {services.map((service: any) => {
+                    {personServices.map((service: any) => {
                       const selected = !!person.selectedServices[service.id]
                       return (
                         <Card
@@ -384,13 +466,23 @@ export default function BookingPage() {
                       )
                     })}
                   </div>
-                  {/* Selected Services */}
+                  
+                  {/* No services message */}
+                  {personServices.length === 0 && (
+                    <div className="text-center p-8 bg-muted/50 rounded-xl">
+                      <p className="text-muted-foreground">
+                        No services found for the selected filters.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Selected Services for this person */}
                   {Object.keys(person.selectedServices).length > 0 && (
                     <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green/20">
                       <CardContent className="p-6">
                         <h4 className="font-bold mb-3 flex items-center gap-2 text-green-800">
                           <CheckCircle className="h-5 w-5" />
-                          Selected Services
+                          Selected Services for Person {personIndex}
                         </h4>
                         <div className="space-y-3">
                           {Object.entries(person.selectedServices).map(([serviceId, quantity]) => {
@@ -434,6 +526,7 @@ export default function BookingPage() {
                 </div>
               )
             })}
+            
             {/* Pagination */}
             <div className="flex justify-between items-center mt-6 p-4 bg-white rounded-xl shadow-sm border">
               <Button
@@ -497,19 +590,6 @@ export default function BookingPage() {
                 </Button>
               ))}
             </div>
-            {/* <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber/20">
-              <label className="flex items-center gap-2 mb-2 font-medium text-amber-800">
-                <Gift className="h-5 w-5" />
-                Promo Code (optional)
-              </label>
-              <input
-                type="text"
-                placeholder="Enter promo code"
-                className="w-full p-3 border-0 bg-white rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
-            </div> */}
           </div>
         )
       case 3:

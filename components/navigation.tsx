@@ -4,13 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Scissors, Globe, Sun, Moon, LogOut } from "lucide-react";
+import { Menu, X, Scissors, Globe, Sun, Moon, LogOut, Coins } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/language-provider";
 import { gsap } from "gsap";
 import { useAppDispatch } from "@/store/hook";
 import { authSLice } from "@/store/slice/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import CoinsIcon from "./ui/coin";
+import { logout } from "@/store/store";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -27,6 +29,7 @@ export function Navigation() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [coin, setCoins] = useState();
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
@@ -36,6 +39,7 @@ export function Navigation() {
       .unwrap()
       .then((res: any) => {
         setUsername(res.user.name);
+        setCoins(res?.user?.point)
       });
   }, []);
   useEffect(() => {
@@ -300,13 +304,18 @@ export function Navigation() {
                     {username}
                   </span>
                 </div>
+                  <div className="flex gap-1 items-center text-xs text-orange-300">
+                    <Coins className=""/>
+                    {coin||0}
+                    </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-foreground hover:text-primary"
                   onClick={() => {
                     localStorage.clear();
-                    router.refresh();
+                    logout()
+                   window.location.reload()
                   }}
                 >
                   <LogOut />
@@ -438,6 +447,9 @@ export function Navigation() {
                       <span className="text-sm font-bold text-primary">
                         {username}
                       </span>
+                    </div>
+                    <div className="">
+                    <Coins className="text-black"/>
                     </div>
                     <Button
                       variant="ghost"

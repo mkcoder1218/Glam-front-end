@@ -1,9 +1,12 @@
+// store.ts
 import { configureStore, Reducer } from '@reduxjs/toolkit';
 import { userSLice } from './slice/user';
 import { authSLice } from './slice/auth';
 import { serviceSlice } from './slice/service';
 import { serviceCategorySlice } from './slice/service-category';
 import { bookingSlice, bookingServicesSlice } from './slice/booking';
+import { roleSLice } from './slice/role';
+import { serviceTypeSlice } from './slice/service-type';
 
 import {
   persistStore,
@@ -17,8 +20,7 @@ import {
   PersistConfig,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage
-import { roleSLice } from './slice/role';
-import { serviceTypeSlice } from './slice/service-type';
+import { useRouter } from 'next/navigation';
 
 // Helper function to wrap any slice reducer with persist
 const createPersistedReducer = (key: string, reducer: Reducer, whitelist: string[] = []) => {
@@ -30,16 +32,17 @@ const createPersistedReducer = (key: string, reducer: Reducer, whitelist: string
   return persistReducer(config, reducer);
 };
 
+// Configure store
 export const store = configureStore({
   reducer: {
-    users: createPersistedReducer('users', userSLice.reducer, ['admin']), // persist 'admin' field
+    users: createPersistedReducer('users', userSLice.reducer, ['admin']),
     auth: createPersistedReducer('auth', authSLice.reducer, ['admin']),
-    service: serviceSlice.reducer, // not persisted
-    serviceCategory: serviceCategorySlice.reducer, // not persisted
-    serviceType: serviceTypeSlice.reducer, // not persisted
-    booking: bookingSlice.reducer, // not persisted
-    bookingServices: bookingServicesSlice.reducer, // not persisted
-    role: roleSLice.reducer, // not persisted
+    service: serviceSlice.reducer,
+    serviceCategory: serviceCategorySlice.reducer,
+    serviceType: serviceTypeSlice.reducer,
+    booking: bookingSlice.reducer,
+    bookingServices: bookingServicesSlice.reducer,
+    role: roleSLice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -53,3 +56,21 @@ export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+
+
+/**
+ * Clears persisted state, resets slices, and removes tokens.
+ */
+
+export const logout = () => {
+
+
+  localStorage.removeItem('token');
+
+  // Purge persisted state
+  persistor.purge();
+
+  // Redirect to login
+
+};
