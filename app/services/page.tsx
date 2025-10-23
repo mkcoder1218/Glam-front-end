@@ -9,6 +9,7 @@ import { serviceCategorySlice } from "@/store/slice/service-category"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serviceSlice } from "@/store/slice/service"
 import { encodeQuery } from "@/utils/utils"
+import Link from "next/link"
 
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -132,8 +133,10 @@ export default function ServicesPage() {
                       <span className="font-semibold text-primary">{service.price}</span>
                     </div>
 
-                    <Button className="w-full text-xs py-1 bg-accent hover:bg-accent/90 text-accent-foreground">
+                    <Button  className="w-full text-xs py-1 bg-accent hover:bg-accent/90 text-accent-foreground">
+                    <Link href={'/booking'} className="w-full h-full items-center justify-center flex">
                       Book
+                      </Link>
                     </Button>
                   </div>
                 </div>

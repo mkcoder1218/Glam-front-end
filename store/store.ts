@@ -21,6 +21,7 @@ import {
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage
 import { useRouter } from 'next/navigation';
+import { GallerySlice } from './slice/Gallery';
 
 // Helper function to wrap any slice reducer with persist
 const createPersistedReducer = (key: string, reducer: Reducer, whitelist: string[] = []) => {
@@ -40,6 +41,7 @@ export const store = configureStore({
     service: serviceSlice.reducer,
     serviceCategory: serviceCategorySlice.reducer,
     serviceType: serviceTypeSlice.reducer,
+    gallery:GallerySlice.reducer,
     booking: bookingSlice.reducer,
     bookingServices: bookingServicesSlice.reducer,
     role: roleSLice.reducer,

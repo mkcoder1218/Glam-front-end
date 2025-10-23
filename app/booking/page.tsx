@@ -443,9 +443,14 @@ export default function BookingPage() {
                             handleServiceToggle(personIndex, service.id)
                           }}
                         >
-                          <CardContent className="p-6">
+                          <CardContent className="p-0">
+                            <div className="flex flex-col">
+                            <div className="">
+                              <img className="w-full h-[70%] rounded-lg" src={`http://localhost:3002/${service?.File?.path}`} crossOrigin="anonymous" alt="" />
+                            </div>
+                            <div className="col-span-2 px-2 py-2">
                             <div className="flex justify-between items-start mb-3">
-                              <h3 className={`font-bold ${selected ? "text-primary-foreground" : "text-foreground"}`}>
+                              <h3 className={`font-bold text-xl ${selected ? "text-primary-foreground" : "text-foreground"}`}>
                                 {service.name}
                               </h3>
                               <Badge 
@@ -455,12 +460,14 @@ export default function BookingPage() {
                                 {service.duration} min
                               </Badge>
                             </div>
-                            <p className={`text-2xl font-black ${selected ? "text-primary-foreground bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" : "text-primary"}`}>
-                              ${service.price}
+                            <p className={` font-black ${selected ? "text-primary-foreground bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" : "text-primary"}`}>
+                              ETB {service.price}
                             </p>
                             <p className={`text-sm mt-2 ${selected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                               {service.description}
                             </p>
+                            </div>
+                            </div>
                           </CardContent>
                         </Card>
                       )

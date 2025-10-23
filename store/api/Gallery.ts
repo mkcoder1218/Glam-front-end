@@ -4,4 +4,4 @@ import { createEntityApi } from "../Dal/BaseDal";
 
 
 // Create standard CRUD API for users
-export const serviceApi = createEntityApi('service');
+export const GalleryApi = createEntityApi('gallery');
