@@ -460,7 +460,7 @@ export default function BookingPage() {
                                 {service.duration} min
                               </Badge>
                             </div>
-                            <p className={` font-black ${selected ? "text-primary-foreground bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" : "text-primary"}`}>
+                            <p className={` font-black ${selected ? " bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" : "text-primary"}`}>
                               ETB {service.price}
                             </p>
                             <p className={`text-sm mt-2 ${selected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
