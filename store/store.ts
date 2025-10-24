@@ -22,6 +22,7 @@ import {
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage
 import { useRouter } from 'next/navigation';
 import { GallerySlice } from './slice/Gallery';
+import discountSlice from './slice/setDisacount';
 
 // Helper function to wrap any slice reducer with persist
 const createPersistedReducer = (key: string, reducer: Reducer, whitelist: string[] = []) => {
@@ -45,6 +46,7 @@ export const store = configureStore({
     booking: bookingSlice.reducer,
     bookingServices: bookingServicesSlice.reducer,
     role: roleSLice.reducer,
+    promodiscount:discountSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

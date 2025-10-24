@@ -13,6 +13,7 @@ import { authSLice } from "@/store/slice/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import CoinsIcon from "./ui/coin";
 import { logout } from "@/store/store";
+import { setDiscount } from "@/store/slice/setDisacount";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -39,7 +40,10 @@ export function Navigation() {
       .unwrap()
       .then((res: any) => {
         setUsername(res.user.name);
-        setCoins(res?.user?.point)
+        setCoins(res?.user?.point);
+        if(res?.user?.promo_code_id){
+        dispatch(setDiscount({discount:res?.user?.promoCode?.discount,expiry:res?.user?.promoCode?.valid_until}))
+        }
       });
   }, []);
   useEffect(() => {

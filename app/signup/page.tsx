@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Eye, EyeOff, Lock, User, ArrowRight, Sparkles, Phone } from "lucide-react"
+import { Eye, EyeOff, Lock, User, ArrowRight, Sparkles, Phone, Gift } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { useAppDispatch, useAppSelector } from "@/store/hook"
 import { authSLice } from "@/store/slice/auth"
@@ -25,7 +25,7 @@ export default function SignupPage() {
   const roleState = useAppSelector((state: any) => state.role)
   
   useEffect(() => {
-    dispatch(roleSLice?.actions?.fetchAllRole())
+    dispatch(roleSLice?.actions?.fetchAllSelectedrole())
   }, [])
   
   const [formData, setFormData] = useState({
@@ -33,7 +33,9 @@ export default function SignupPage() {
     phone_number: "",
     password: "",
     confirmPassword: "",
-    role_id: ""
+    role_id: "",
+    code:""
+    
   })
   
   // Automatically assign "User" role
@@ -59,7 +61,9 @@ export default function SignupPage() {
       name: formData.name,
       phone_number: formData.phone_number,
       password: formData.password,
-      role_id: formData.role_id
+      role_id: formData.role_id,
+      code:formData.code,
+      status:'Active'
     }
 
     dispatch(authSLice?.actions?.signupAuth(signupData)).unwrap().then(()=>{
@@ -139,7 +143,23 @@ export default function SignupPage() {
                   />
                 </div>
               </div>
+              {/* Promo code */}
 
+  <div className="space-y-2">
+                <Label htmlFor="promo_code" className="text-sm font-medium text-foreground">{t("promoCode") || "Promo Code"}</Label>
+                <div className="relative">
+                  <Gift className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="code"
+                    name="code"
+                    type="text"
+                    placeholder={t("enterPromoCode") || "Enter promo code"}
+                    value={formData.code}
+                    onChange={handleInputChange}
+                    className="pl-10 h-11 bg-background/50 border-border/50 focus:border-accent focus:ring-accent/20"
+                  />
+                </div>
+              </div>
               {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium text-foreground">{t("password")}</Label>
@@ -198,7 +218,7 @@ export default function SignupPage() {
               </div>
 
               {/* Hidden Role ID */}
-              <input type="hidden" name="role_id" value={formData.role_id} />
+              <input type="" name="role_id" value={formData.role_id} />
 
               {/* Submit */}
               <Button

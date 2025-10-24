@@ -57,6 +57,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfileAndBookings = async () => {
       try {
+        
         const profileRes = await dispatch(
           authSLice.actions.getProfileAuth()
         ).unwrap();
