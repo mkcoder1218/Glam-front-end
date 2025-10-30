@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { encodeQuery } from "@/utils/utils";
-import { Calendar, Coins, Phone } from "lucide-react";
+import { Calendar, Coins, Gift, Phone } from "lucide-react";
 
 interface UserProfile {
   id: string;
@@ -143,7 +143,16 @@ export default function ProfilePage() {
                 </span>{" "}
                 <div className="flex gap-1 items-center text-xs text-orange-700">
                   <Coins className="" />
-                  {userProfile?.point}
+                  {userProfile?.point||'0'}
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <span className="font-semibold text-orange-500 flex gap-2">
+                  Promo code:
+                </span>{" "}
+                <div className="flex gap-1 items-center text-xs text-orange-700">
+                  <Gift className="" />
+                  {(userProfile as any)?.promoCode?.code||'No promo code'}
                 </div>
               </div>
 

@@ -62,7 +62,7 @@ export default function SignupPage() {
       phone_number: formData.phone_number,
       password: formData.password,
       role_id: formData.role_id,
-      code:formData.code,
+     ...(formData?.code&&{ code:formData.code}),
       status:'Active'
     }
 

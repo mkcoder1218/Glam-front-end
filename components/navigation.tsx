@@ -8,12 +8,13 @@ import { Menu, X, Scissors, Globe, Sun, Moon, LogOut, Coins } from "lucide-react
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/language-provider";
 import { gsap } from "gsap";
-import { useAppDispatch } from "@/store/hook";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { authSLice } from "@/store/slice/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import CoinsIcon from "./ui/coin";
 import { logout } from "@/store/store";
-import { setDiscount } from "@/store/slice/setDisacount";
+import { setDiscount, setreedemAmount, setuserpoint } from "@/store/slice/setDisacount";
+import { PointsSlice } from "@/store/slice/point";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -30,7 +31,8 @@ export function Navigation() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [coin, setCoins] = useState();
+  const coin=useAppSelector((state)=>state?.promodiscount?.point)
+
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
@@ -40,10 +42,18 @@ export function Navigation() {
       .unwrap()
       .then((res: any) => {
         setUsername(res.user.name);
-        setCoins(res?.user?.point);
+
+        dispatch(setuserpoint({point:res?.user?.point}))
         if(res?.user?.promo_code_id){
         dispatch(setDiscount({discount:res?.user?.promoCode?.discount,expiry:res?.user?.promoCode?.valid_until}))
         }
+      });
+    dispatch(PointsSlice?.actions?.fetchAllPoints())
+      .unwrap()
+      .then((res: any) => {
+      
+        dispatch(setreedemAmount({reedemAmount:res?.data?.[0]?.reedem_amount}))
+        
       });
   }, []);
   useEffect(() => {

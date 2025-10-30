@@ -28,6 +28,10 @@ import { bookingApi, bookingServicesApi } from "@/store/api/booking";
 import { authSLice } from "@/store/slice/auth";
 import { serviceCategorySlice } from "@/store/slice/service-category";
 import { serviceTypeSlice } from "@/store/slice/service-type";
+import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
+import { DialogOverlay } from "@radix-ui/react-dialog";
+import axios from "axios";
+import { setDiscount, setuserpoint } from "@/store/slice/setDisacount";
 
 // Mocked time slots
 const timeSlots = [
@@ -80,32 +84,46 @@ export default function BookingPage() {
   // Global filters for pagination
   const [page, setPage] = useState(1);
   const limit = 10;
-const discountPromo=useAppSelector((state)=>state.promodiscount)
+  const discountPromo = useAppSelector((state) => state.promodiscount);
   const dispatch = useAppDispatch();
   const services =
     useAppSelector((state) => (state?.service?.items as any)?.data) || [];
   const totalServices =
-    useAppSelector((state) => (state?.service?.items as any)?.total) || 0;
+    useAppSelector((state) => (state?.service?.items as any)?.meta?.total) || 0;
   const categories =
     useAppSelector((state) => (state?.serviceCategory?.items as any)?.data) ||
     [];
   const serviceTypes =
     useAppSelector((state) => (state?.serviceType?.items as any)?.data) || [];
+  const userPoints=useAppSelector((state)=>state?.promodiscount?.point)
+  const ReedeemAmount=useAppSelector((state)=>state?.promodiscount?.reedemAmount)
+  const [wantToReedem,setWanttoReedem]=useState(false)
+  console.log('Reedem Amount',ReedeemAmount,'user Point',userPoints)
+  const [openModal,setOpenModal]=useState(false)
 
+  useEffect(()=>{
+    if(ReedeemAmount&&ReedeemAmount>0&&userPoints&&userPoints>0){
+    if(ReedeemAmount<=userPoints){
+      setOpenModal(true)
+    }else{
+      setOpenModal(false)
+    }
+  }
+  },[ReedeemAmount,userPoints])
   const [formData, setFormData] = useState({ date: "", time: "" });
   const [promoCode, setPromoCode] = useState("");
   const totalSteps = 3;
-  console.log('discount promo',discountPromo)
-function isDiscountExpired(validUntil: string): boolean {
-  const expiryDate = new Date(validUntil);
-  const today = new Date();
+  console.log("discount promo", discountPromo);
+  function isDiscountExpired(validUntil: string): boolean {
+    const expiryDate = new Date(validUntil);
+    const today = new Date();
 
-  // Set time of both dates to midnight for accurate comparison
-  expiryDate.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
+    // Set time of both dates to midnight for accurate comparison
+    expiryDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
-  return today > expiryDate;
-}
+    return today > expiryDate;
+  }
   const animateSelection = (element: HTMLElement) => {
     gsap.to(element, {
       scale: 0.95,
@@ -258,14 +276,14 @@ function isDiscountExpired(validUntil: string): boolean {
   };
 
   const handleNext = () => {
-    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
+ window.scrollTo({ top: 0, behavior: "smooth" });
+     if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  // Submit booking using APIs
   const handleSubmit = async () => {
     const user = await dispatch(authSLice.actions.getProfileAuth()).unwrap();
     try {
@@ -276,10 +294,18 @@ function isDiscountExpired(validUntil: string): boolean {
           Object.entries(selectedServices).forEach(([serviceId, quantity]) => {
             const service = services.find((s: any) => s.id === serviceId);
             if (service) {
+              // Calculate discounted price for each service
+              const discountedPrice = calculateDiscountedPrice(
+                service?.price,
+                !isDiscountExpired(discountPromo?.expiry as any)
+                  ? discountPromo?.discount
+                  : service.discount
+              );
+
               for (let i = 0; i < quantity; i++) {
                 bookingServicesPayload.push({
                   service_id: service.id,
-                  price: service.price,
+                  price: discountedPrice, // Use discounted price instead of original
                   duration: service.duration,
                   person_type: personType,
                 });
@@ -317,7 +343,7 @@ function isDiscountExpired(validUntil: string): boolean {
         },
       };
 
-      const booking = await bookingApi.createItem(bookingPayload);
+      const booking = await bookingApi.createItem(bookingPayload as any);
       const bookingId = booking?.id || (booking as any)?.data?.id;
 
       for (const bs of bookingServicesPayload) {
@@ -332,6 +358,22 @@ function isDiscountExpired(validUntil: string): boolean {
 
       showSuccessToast("Booking successfully created!");
       setCurrentStep(4); // success step
+if(wantToReedem){
+  
+    await axios.post(`http://localhost:3002/api/booking/${user?.user?.id}/reedem`).then(()=>{dispatch(authSLice?.actions?.getProfileAuth())
+      .unwrap()
+      .then((res: any) => {
+        dispatch(setuserpoint({point:res?.user?.point}))
+        if(res?.user?.promo_code_id){
+        dispatch(setDiscount({discount:res?.user?.promoCode?.discount,expiry:res?.user?.promoCode?.valid_until}))
+        }
+        setWanttoReedem(false)
+      }
+    
+    );});
+      
+    showSuccessToast("Booking successfully created and points redeemed!");
+}
     } catch (error) {
       console.error(error);
       showErrorToast("Error creating booking.");
@@ -374,18 +416,18 @@ function isDiscountExpired(validUntil: string): boolean {
       case 1:
         return (
           <div className="space-y-6 step-content">
-            <div className="text-center mb-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-              <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="text-center mb-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
+              <h2 className="text-xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Select Services
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Choose how many people and assign one or more services to each
               </p>
             </div>
             {/* Number of people */}
-            <div className="flex items-center gap-4 mb-4 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-border/50">
+            <div className="flex items-center gap-4 mb-4 p-2 bg-white/50 backdrop-blur-sm rounded-xl border border-border/50">
               <Users className="h-5 w-5 text-primary" />
-              <span className="font-medium">How many people?</span>
+              <span className="font-medium text-xs">How many people?</span>
               <Select
                 value={String(numPeople)}
                 onValueChange={(val) => {
@@ -411,7 +453,7 @@ function isDiscountExpired(validUntil: string): boolean {
                   setPeopleServices(updated);
                 }}
               >
-                <SelectTrigger className="w-28 border-primary/30 focus:ring-primary">
+                <SelectTrigger className="w-14 border-primary/30 focus:ring-primary">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -436,10 +478,10 @@ function isDiscountExpired(validUntil: string): boolean {
               const personServices = getFilteredServicesForPerson(personIndex);
 
               return (
-                <div key={i} className="mb-8">
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 rounded-t-2xl shadow-lg mb-4">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                      <Users className="h-5 w-5" />
+                <div key={i} className="mb-2">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 rounded-t-2xl shadow-lg mb-2">
+                    <h3 className="text-xs font-bold flex items-center gap-2">
+                      <Users className="h-2 w-2" />
                       Person {personIndex}
                     </h3>
                   </div>
@@ -447,37 +489,38 @@ function isDiscountExpired(validUntil: string): boolean {
                   {/* Person type and filters */}
                   <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-white rounded-xl shadow-sm border">
                     {/* Person type */}
-                    <div className="flex gap-4">
-                      {(["Adult", "Child"] as const).map((type) => (
-                        <label
-                          key={type}
-                          className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-primary/5 transition-colors"
-                        >
-                          <input
-                            type="radio"
-                            name={`person-type-${personIndex}`}
-                            value={type}
-                            checked={person.personType === type}
-                            onChange={() =>
-                              handlePersonTypeChange(personIndex, type)
-                            }
-                            className="text-primary focus:ring-primary"
-                          />
-                          <span
-                            className={
-                              person.personType === type
-                                ? "font-semibold text-primary"
-                                : ""
-                            }
+                    <div className="flex gap-4 justify-between w-full">
+                      <div className="flex gap-2">
+                        {(["Adult", "Child"] as const).map((type) => (
+                          <label
+                            key={type}
+                            className="flex items-center text-xs gap-2 cursor-pointer p-2 rounded-lg hover:bg-primary/5 transition-colors"
                           >
-                            {type}
-                          </span>
-                        </label>
-                      ))}
+                            <input
+                              type="radio"
+                              name={`person-type-${personIndex}`}
+                              value={type}
+                              checked={person.personType === type}
+                              onChange={() =>
+                                handlePersonTypeChange(personIndex, type)
+                              }
+                              className="text-primary focus:ring-primary"
+                            />
+                            <span
+                              className={
+                                person.personType === type
+                                  ? "font-semibold text-xs text-primary"
+                                  : ""
+                              }
+                            >
+                              {type}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-
                     {/* Category filter for this person */}
-                    <div className="flex-1">
+                    <div className="self-end">
                       <Select
                         value={person.selectedCategory ?? "all"}
                         onValueChange={(value) =>
@@ -536,14 +579,18 @@ function isDiscountExpired(validUntil: string): boolean {
                   </div>
 
                   {/* Services grid for this person */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     {personServices.map((service: any) => {
                       const selected = !!person.selectedServices[service.id];
                       const discountedPrice = calculateDiscountedPrice(
                         service?.price,
-                        !isDiscountExpired(discountPromo?.expiry as any)?discountPromo?.discount:service.discount
+                        !isDiscountExpired(discountPromo?.expiry as any)
+                          ? discountPromo?.discount
+                          : service.discount
                       );
-                const hasDiscount = !isDiscountExpired(discountPromo?.expiry as any)||service.discount && service.discount > 0
+                      const hasDiscount =
+                        !isDiscountExpired(discountPromo?.expiry as any) ||
+                        (service.discount && service.discount > 0);
 
                       return (
                         <Card
@@ -562,7 +609,7 @@ function isDiscountExpired(validUntil: string): boolean {
                             <div className="flex flex-col">
                               <div className="">
                                 <img
-                                  className="w-full h-[70%] rounded-lg"
+                                  className="w-full h-[200px] rounded-lg"
                                   src={`http://localhost:3002/${service?.File?.path}`}
                                   crossOrigin="anonymous"
                                   alt=""
@@ -571,7 +618,7 @@ function isDiscountExpired(validUntil: string): boolean {
                               <div className="col-span-2 px-2 py-2">
                                 <div className="flex justify-between items-start mb-3">
                                   <h3
-                                    className={`font-bold text-xl ${
+                                    className={`font-bold whitespace-nowrap text-xl ${
                                       selected
                                         ? "text-primary-foreground"
                                         : "text-foreground"
@@ -590,24 +637,35 @@ function isDiscountExpired(validUntil: string): boolean {
                                     {service.duration} min
                                   </Badge>
                                 </div>
-                               
-                                   <span className="font-semibold text-primary">
-                          {hasDiscount ? (
-                            <>
-                              <span className="line-through  mr-1 text-red-500">
-                                {service.price } ETB
-                              </span>
-                              <span>{discountedPrice } ETB</span>
-                            </>
-                          ) : (
-                            service.price
-                          )}
-                        </span>
+
+                                <span className="font-semibold text-primary">
+                                  {wantToReedem&&service.product_price>0&& (
+                                    <>
+                                      <span className="line-through  mr-1 text-red-500">
+                                        {service.price} ETB
+                                      </span>
+                                      <span>{service.product_price} ETB</span>
+                                    </>
+                                  ) }
+                                </span>
+                               {!wantToReedem&&service.product_price>0&& <span className="font-semibold text-primary">
+                                  {hasDiscount ? (
+                                    <>
+                                      <span className="line-through  mr-1 text-red-500">
+                                        {service.price} ETB
+                                      </span>
+                                      <span>{discountedPrice} ETB</span>
+                                    </>
+                                  ) : (
+                                    service.price + " ETB"
+                                  )}
+                                </span>}
                                 <p
+                                  title={service?.description}
                                   className={`text-sm mt-2 ${
                                     selected
                                       ? "text-primary-foreground/80"
-                                      : "text-muted-foreground"
+                                      : "text-muted-foreground truncate max-w-[300px]"
                                   }`}
                                 >
                                   {service.description}
@@ -644,22 +702,80 @@ function isDiscountExpired(validUntil: string): boolean {
                                 (s: any) => s.id === serviceId
                               );
                               if (!service) return null;
+
                               const perWig = isPerWig(service);
                               const displayQuantity = perWig ? quantity : 1;
+
+                              // Calculate discounted price
+                              const discountedPrice = calculateDiscountedPrice(
+                                service?.price,
+                                !isDiscountExpired(discountPromo?.expiry as any)
+                                  ? discountPromo?.discount
+                                  : service.discount
+                              );
+                              const hasDiscount =
+                                !isDiscountExpired(
+                                  discountPromo?.expiry as any
+                                ) ||
+                                ( service.discount > 0);
+
                               const displayPrice =
+                                Number(discountedPrice) * displayQuantity;
+                              const originalPrice =
                                 Number(service.price) * displayQuantity;
+                              const productPrice =
+                                Number(service.product_price) * displayQuantity;
+
                               return (
                                 <div
                                   key={serviceId}
                                   className="flex justify-between items-center py-2 px-4 bg-white rounded-lg shadow-inner"
                                 >
-                                  <span className="font-medium text-green-800">
-                                    {service.name} {perWig && `(x${quantity})`}
-                                  </span>
-                                  <div className="flex items-center gap-3">
-                                    <span className="font-bold text-xl text-green-700">
-                                      ${displayPrice}
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-green-800">
+                                      {service.name}{" "}
+                                      {perWig && `(x${quantity})`}
                                     </span>
+                                    {!wantToReedem&&hasDiscount && (
+                                      <span className="text-xs text-muted-foreground line-through">
+                                        Original: {originalPrice} ETB
+                                      </span>
+                                    )}
+                                    {wantToReedem&&hasDiscount && (
+                                      <span className="text-xs text-muted-foreground line-through">
+                                        Original: {productPrice} ETB
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                   {!wantToReedem&& <div className="flex flex-col items-end">
+                                      <span className="font-bold text-xl text-green-700">
+                                        {displayPrice} ETB
+                                      </span>
+                                      {hasDiscount && (
+                                        <span className="text-xs text-red-500 font-semibold">
+                                          You save:{" "}
+                                          {(
+                                            originalPrice - displayPrice
+                                          ).toFixed(2)}{" "}
+                                          ETB
+                                        </span>
+                                      )}
+                                    </div>}
+                                   {wantToReedem&& <div className="flex flex-col items-end">
+                                      <span className="font-bold text-xl text-green-700">
+                                        {productPrice} ETB
+                                      </span>
+                                      { (
+                                        <span className="text-xs text-red-500 font-semibold">
+                                          You save:{" "}
+                                          {(
+                                            originalPrice - productPrice
+                                          ).toFixed(2)}{" "}
+                                          ETB
+                                        </span>
+                                      )}
+                                    </div>}
                                     {perWig && (
                                       <Select
                                         value={String(quantity)}
@@ -865,19 +981,38 @@ function isDiscountExpired(validUntil: string): boolean {
         return null;
     }
   };
-
+const renderModal=()=>{
+ return( <Dialog open={openModal} onOpenChange={setOpenModal}>
+  <DialogOverlay onClick={()=>{
+          setWanttoReedem(false)
+          setOpenModal(false)
+        }} />
+    <DialogContent>
+   
+      <div className="">You reached the point reedem stage do you want to Reedem?</div>
+      <div className="flex gap-3">
+        <Button onClick={()=>{
+          setWanttoReedem(true)
+          setOpenModal(false)
+        }} className="bg-amber-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 text-gray-50 hover:text-black cursor-pointer">Yes</Button>
+        <Button onClick={()=>setOpenModal(false)} className="bg-red-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 hover:text-black cursor-pointer">No</Button>
+      </div>
+    </DialogContent>
+  </Dialog>)
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <div className="">{renderModal()}</div>
       <section className="py-16 relative overflow-hidden">
-        {/* Background elements */}
+
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple/5 rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-4xl mx-auto px-4 relative z-10">
+        <div className="md:max-w-[95vw] sm:max-w-[100vw] mx-auto px-4 relative z-10">
           {/* Progress */}
           {currentStep <= 3 && (
-            <div className="flex items-center justify-between mb-8 relative">
+            <div className="flex items-center justify-between mb-2 relative">
               <div className="absolute inset-0 flex items-center">
                 {[1, 2].map((_, i) => (
                   <div
@@ -893,7 +1028,7 @@ function isDiscountExpired(validUntil: string): boolean {
               {[1, 2, 3].map((step) => (
                 <div
                   key={step}
-                  className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 ${
+                  className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full shadow-lg transition-all duration-300 ${
                     step <= currentStep
                       ? "bg-gradient-to-r from-primary to-primary/80 border-primary text-primary-foreground shadow-primary/25"
                       : "bg-white border-2 border-border/50 text-muted-foreground hover:bg-primary/5"
