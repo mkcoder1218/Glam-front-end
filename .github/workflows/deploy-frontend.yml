@@ -1,0 +1,27 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/Glam-front-end
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart glamnestsalon-frontend || pm2 start npm --name glamnest-frontend -- run start
+            pm2 save
