@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:3002/api', // dynamic base URL
+  baseURL: 'http://api.glamnestsalon.com/api', // dynamic base URL
   headers: {
     'Content-Type': 'application/json',
   },
