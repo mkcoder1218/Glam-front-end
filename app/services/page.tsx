@@ -131,7 +131,7 @@ function isDiscountExpired(validUntil: string): boolean {
                       )}
                       <img
                         src={
-                          'http://localhost:3002/'+service.File?.path
+                          'http://api.glamnestsalon.com/'+service.File?.path
                             
                         }
                         crossOrigin="anonymous"

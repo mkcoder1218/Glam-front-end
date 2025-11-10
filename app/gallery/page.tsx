@@ -94,7 +94,7 @@ export default function GalleryPage() {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src={`http://localhost:3002/${item?.File?.path}`}
+                        src={`http://api.glamnestsalon.com/${item?.File?.path}`}
                         alt={item.name}
                         className="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -187,7 +187,7 @@ export default function GalleryPage() {
               </DialogHeader>
               <div className="p-4">
                 <img
-                  src={`http://localhost:3002/${selectedItem?.File?.path}`}
+                  src={`http://api.glamnestsalon.com/${selectedItem?.File?.path}`}
                   alt={selectedItem.name}
                   className="w-full h-auto rounded-lg object-contain max-h-[80vh]"
                 />

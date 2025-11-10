@@ -360,7 +360,7 @@ export default function BookingPage() {
       setCurrentStep(4); // success step
 if(wantToReedem){
   
-    await axios.post(`http://localhost:3002/api/booking/${user?.user?.id}/reedem`).then(()=>{dispatch(authSLice?.actions?.getProfileAuth())
+    await axios.post(`http://api.glamnestsalon.com/api/booking/${user?.user?.id}/reedem`).then(()=>{dispatch(authSLice?.actions?.getProfileAuth())
       .unwrap()
       .then((res: any) => {
         dispatch(setuserpoint({point:res?.user?.point}))
@@ -610,7 +610,7 @@ if(wantToReedem){
                               <div className="">
                                 <img
                                   className="w-full h-[200px] rounded-lg"
-                                  src={`http://localhost:3002/${service?.File?.path}`}
+                                  src={`http://api.glamnestsalon.com/${service?.File?.path}`}
                                   crossOrigin="anonymous"
                                   alt=""
                                 />
