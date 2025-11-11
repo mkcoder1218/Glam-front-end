@@ -4,7 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Scissors, Globe, Sun, Moon, LogOut, Coins } from "lucide-react";
+import {
+  Menu,
+  X,
+  Scissors,
+  Globe,
+  Sun,
+  Moon,
+  LogOut,
+  Coins,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/language-provider";
 import { gsap } from "gsap";
@@ -13,7 +22,11 @@ import { authSLice } from "@/store/slice/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import CoinsIcon from "./ui/coin";
 import { logout } from "@/store/store";
-import { setDiscount, setreedemAmount, setuserpoint } from "@/store/slice/setDisacount";
+import {
+  setDiscount,
+  setreedemAmount,
+  setuserpoint,
+} from "@/store/slice/setDisacount";
 import { PointsSlice } from "@/store/slice/point";
 
 const navItems = [
@@ -31,7 +44,7 @@ export function Navigation() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const coin=useAppSelector((state)=>state?.promodiscount?.point)
+  const coin = useAppSelector((state) => state?.promodiscount?.point);
 
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
@@ -43,17 +56,22 @@ export function Navigation() {
       .then((res: any) => {
         setUsername(res.user.name);
 
-        dispatch(setuserpoint({point:res?.user?.point}))
-        if(res?.user?.promo_code_id){
-        dispatch(setDiscount({discount:res?.user?.promoCode?.discount,expiry:res?.user?.promoCode?.valid_until}))
+        dispatch(setuserpoint({ point: res?.user?.point }));
+        if (res?.user?.promo_code_id) {
+          dispatch(
+            setDiscount({
+              discount: res?.user?.promoCode?.discount,
+              expiry: res?.user?.promoCode?.valid_until,
+            })
+          );
         }
       });
     dispatch(PointsSlice?.actions?.fetchAllPoints())
       .unwrap()
       .then((res: any) => {
-      
-        dispatch(setreedemAmount({reedemAmount:res?.data?.[0]?.reedem_amount}))
-        
+        dispatch(
+          setreedemAmount({ reedemAmount: res?.data?.[0]?.reedem_amount })
+        );
       });
   }, []);
   useEffect(() => {
@@ -318,18 +336,18 @@ export function Navigation() {
                     {username}
                   </span>
                 </div>
-                  <div className="flex gap-1 items-center text-xs text-orange-300">
-                    <Coins className=""/>
-                    {coin||0}
-                    </div>
+                <div className="flex gap-1 items-center text-xs text-orange-300">
+                  <Coins className="" />
+                  {coin || 0}
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-foreground hover:text-primary"
                   onClick={() => {
                     localStorage.clear();
-                    logout()
-                   window.location.reload()
+                    logout();
+                    window.location.reload();
                   }}
                 >
                   <LogOut />
@@ -371,6 +389,12 @@ export function Navigation() {
               onClick={handleMobileMenuToggle}
               className="text-foreground"
             >
+              {username && (
+                <div className="flex gap-1 items-center text-lg text-orange-300">
+                  <Coins className="" />
+                  {coin || 0}
+                </div>
+              )}
               {isOpen ? (
                 <X className="h-6 w-6" />
               ) : (
@@ -463,7 +487,7 @@ export function Navigation() {
                       </span>
                     </div>
                     <div className="">
-                    <Coins className="text-black"/>
+                      <Coins className="text-black" />
                     </div>
                     <Button
                       variant="ghost"
@@ -479,30 +503,31 @@ export function Navigation() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                  <Link href="/login" className="flex-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full text-foreground hover:text-primary"
-                      onMouseEnter={handleButtonHover}
-                      onMouseLeave={handleButtonLeave}
-                      onClick={handleButtonClick}
-                    >
-                      {t("signIn")}
-                    </Button>
-                  </Link>
-                  <Link href="/signup" className="flex-1">
-                    <Button
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                      onMouseEnter={handleButtonHover}
-                      onMouseLeave={handleButtonLeave}
-                      onClick={handleButtonClick}
-                    >
-                      {t("signUp")}
-                    </Button>
-                  </Link>
-                </div>)}
+                    <Link href="/login" className="flex-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-foreground hover:text-primary"
+                        onMouseEnter={handleButtonHover}
+                        onMouseLeave={handleButtonLeave}
+                        onClick={handleButtonClick}
+                      >
+                        {t("signIn")}
+                      </Button>
+                    </Link>
+                    <Link href="/signup" className="flex-1">
+                      <Button
+                        size="sm"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onMouseEnter={handleButtonHover}
+                        onMouseLeave={handleButtonLeave}
+                        onClick={handleButtonClick}
+                      >
+                        {t("signUp")}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
