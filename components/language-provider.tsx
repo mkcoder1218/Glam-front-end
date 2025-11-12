@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from "react";
 
-type Language = "en" | "am"
+type Language = "en" | "am";
 
 interface LanguageContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: any
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: any;
 }
 
 const translations = {
@@ -36,13 +36,17 @@ const translations = {
     specialists: "Specialists",
     rating: "Rating",
     whyChooseUs: "Why Choose Us",
-    completeSolutions: "Complete beauty solutions, premium results, personalized experience",
+    completeSolutions:
+      "Complete beauty solutions, premium results, personalized experience",
     advancedTech: "Advanced Tech",
-    advancedTechDesc: "State-of-the-art tools and techniques for precision styling and optimal results.",
+    advancedTechDesc:
+      "State-of-the-art tools and techniques for precision styling and optimal results.",
     expertTeam: "Expert Team",
-    expertTeamDesc: "Certified professionals trained in the latest styling innovations and trends.",
+    expertTeamDesc:
+      "Certified professionals trained in the latest styling innovations and trends.",
     customResults: "Custom Results",
-    customResultsDesc: "Personalized styling solutions tailored to your unique features and lifestyle.",
+    customResultsDesc:
+      "Personalized styling solutions tailored to your unique features and lifestyle.",
     clientExperience: "Client Experience",
     exceptionalVisit: "What makes your visit to Glam Nest truly exceptional",
     luxuryAmbiance: "Luxury Ambiance",
@@ -55,8 +59,9 @@ const translations = {
     aftercareSupportDesc: "Ongoing styling tips and maintenance advice",
     learnMoreAboutUs: "Learn More About Us",
     readyToTransform: "Ready to Transform?",
-    experienceFuture: "Experience the future of beauty and wellness. Book your complete makeover today.",
-    callNumber: "Call (555) 123-4567",
+    experienceFuture:
+      "Experience the future of beauty and wellness. Book your complete makeover today.",
+    callNumber: "Call 09-80-01-43-01",
 
     // Authentication
     welcomeBack: "Welcome Back",
@@ -75,7 +80,7 @@ const translations = {
     dontHaveAccount: "Don't have an account?",
     signUp: "Sign Up",
     backToHome: "Back to Home",
-    
+
     joinCommunity: "Join Our Community",
     createAccount: "Create your account",
     startBeautyJourney: "Start your beauty journey today",
@@ -117,7 +122,8 @@ const translations = {
     completeBeutyExperience: "ሙሉ የውበት ተሞክሮ",
     futureOf: "የወደፊቱ",
     beautyWellness: "ውበት እና ጤንነት",
-    comprehensiveServices: "ዘመናዊ ቴክኒኮችን በመጠቀም ሙሉ የውበት አገልግሎቶችን ይለማመዱ። ፀጉር፣ ጥፍር፣ የቆዳ እንክብካቤ እና ጤንነት በሙሉ በ",
+    comprehensiveServices:
+      "ዘመናዊ ቴክኒኮችን በመጠቀም ሙሉ የውበት አገልግሎቶችን ይለማመዱ። ፀጉር፣ ጥፍር፣ የቆዳ እንክብካቤ እና ጤንነት በሙሉ በ",
     bookExperience: "ተሞክሮ ይመዝገቡ",
     exploreServices: "አገልግሎቶችን ይመልከቱ",
     happyClients: "ደስተኛ ደንበኞች",
@@ -163,7 +169,7 @@ const translations = {
     dontHaveAccount: "መለያ የለዎትም?",
     signUp: "ይመዝገቡ",
     backToHome: "ወደ ቤት ተመለስ",
-    
+
     joinCommunity: "ማህበረሰባችንን ይቀላቀሉ",
     createAccount: "መለያዎን ይፍጠሩ",
     startBeautyJourney: "የውበት ጉዞዎን ዛሬ ይጀምሩ",
@@ -188,33 +194,38 @@ const translations = {
     creatingAccount: "መለያ በመፍጠር ላይ...",
     alreadyHaveAccount: "አስቀድሞ መለያ አለዎት?",
   },
-}
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>("en");
 
   const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
-  }
+    setLanguage(lang);
+  };
 
   const t = (key: string): string => {
-    const translation = translations[language][key as keyof (typeof translations)["en"]] || key
-    return translation
-  }
+    const translation =
+      translations[language][key as keyof (typeof translations)["en"]] || key;
+    return translation;
+  };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage: handleSetLanguage, t }}
+    >
       {children}
     </LanguageContext.Provider>
-  )
+  );
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
+  const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider")
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
-  return context
+  return context;
 }
