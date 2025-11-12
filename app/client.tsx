@@ -1,35 +1,45 @@
-// src/components/ClientProviders.tsx
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppDispatch } from "@/store/hook";
-import { authSLice } from "@/store/slice/auth";
+
 const protectedRoutes = ["/booking", "/services"]; // add your protected pages here
 
 // --- Auth Wrapper ---
 function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const dispatch = useAppDispatch();
-  const user = localStorage.getItem("token");
+  const [isClient, setIsClient] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+
   useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== "undefined") {
+      setToken(localStorage.getItem("token"));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const isProtected = protectedRoutes.some((route) =>
       pathname.startsWith(route)
     );
 
-    if (isProtected && !user) {
+    if (isProtected && !token) {
       router.push("/login");
     }
-  }, [pathname]);
+  }, [isClient, pathname, token, router]);
 
   return <>{children}</>;
 }
+
+// --- Main Provider ---
 export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>

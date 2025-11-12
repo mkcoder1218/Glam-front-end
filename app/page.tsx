@@ -1,26 +1,34 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star, Clock, Users, Sparkles, Heart, ArrowRight, Zap } from "lucide-react"
-import Link from "next/link"
-import { useLanguage } from "@/components/language-provider"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Star,
+  Clock,
+  Users,
+  Sparkles,
+  Heart,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { useLanguage } from "@/components/language-provider";
 
 export default function HomePage() {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   const handleBooking = () => {
-    window.location.href = "/booking"
-  }
+    window.location.href = "/booking";
+  };
 
   const handleServices = () => {
-    window.location.href = "/services"
-  }
+    window.location.href = "/services";
+  };
 
   const handleCall = () => {
-    window.location.href = "tel:+251911123456"
-  }
+    window.location.href = "tel:+251911123456";
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,7 +73,7 @@ export default function HomePage() {
                 <span className="text-accent">{t("beautyWellness")}</span>
               </h1>
 
-              <p className="text-xl sm:text-2xl mb-12 text-muted-foreground leading-relaxed font-light">
+              <p className="text-xs font-light sm:text-xs mb-12 text-muted-foreground leading-relaxed font-light">
                 {t("comprehensiveServices")}{" "}
                 <span className="text-accent font-medium">
                   {t("glam")} {t("nest")}
@@ -96,17 +104,23 @@ export default function HomePage() {
             <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border/50">
               <div className="text-center">
                 <div className="text-3xl font-bold text-accent mb-1">500+</div>
-                <div className="text-sm text-muted-foreground">{t("happyClients")}</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("happyClients")}
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-accent mb-1">20+</div>
-                <div className="text-sm text-muted-foreground">{t("specialists")}</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("specialists")}
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-accent mb-1 flex items-center justify-center gap-1">
                   4.9 <Star className="h-4 w-4 fill-accent text-accent" />
                 </div>
-                <div className="text-sm text-muted-foreground">{t("rating")}</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("rating")}
+                </div>
               </div>
             </div>
           </div>
@@ -116,8 +130,12 @@ export default function HomePage() {
       <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">{t("whyChooseUs")}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light">{t("completeSolutions")}</p>
+            <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
+              {t("whyChooseUs")}
+            </h2>
+            <p className="text-xs  text-muted-foreground max-w-2xl mx-auto font-light">
+              {t("completeSolutions")}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-center">
@@ -126,8 +144,12 @@ export default function HomePage() {
                 <div className="w-20 h-20 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Zap className="h-10 w-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold text-card-foreground mb-4">{t("advancedTech")}</h3>
-                <p className="text-muted-foreground leading-relaxed">{t("advancedTechDesc")}</p>
+                <h3 className="text-2xl font-bold text-card-foreground mb-4">
+                  {t("advancedTech")}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("advancedTechDesc")}
+                </p>
               </CardContent>
             </Card>
 
@@ -136,8 +158,12 @@ export default function HomePage() {
                 <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Users className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-bold text-card-foreground mb-4">{t("expertTeam")}</h3>
-                <p className="text-muted-foreground leading-relaxed">{t("expertTeamDesc")}</p>
+                <h3 className="text-2xl font-bold text-card-foreground mb-4">
+                  {t("expertTeam")}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("expertTeamDesc")}
+                </p>
               </CardContent>
             </Card>
 
@@ -146,8 +172,12 @@ export default function HomePage() {
                 <div className="w-20 h-20 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Sparkles className="h-10 w-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold text-card-foreground mb-4">{t("customResults")}</h3>
-                <p className="text-muted-foreground leading-relaxed">{t("customResultsDesc")}</p>
+                <h3 className="text-2xl font-bold text-card-foreground mb-4">
+                  {t("customResults")}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("customResultsDesc")}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -157,8 +187,12 @@ export default function HomePage() {
       <section className="py-24 bg-card/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-card-foreground mb-6">{t("clientExperience")}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light">{t("exceptionalVisit")}</p>
+            <h2 className="text-4xl sm:text-5xl font-bold text-card-foreground mb-6">
+              {t("clientExperience")}
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light">
+              {t("exceptionalVisit")}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,14 +228,26 @@ export default function HomePage() {
               >
                 <CardContent className="p-8 text-center">
                   <div
-                    className={`w-16 h-16 bg-gradient-to-br ${feature.color === "accent" ? "from-accent/20 to-accent/10" : "from-primary/20 to-primary/10"} rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    className={`w-16 h-16 bg-gradient-to-br ${
+                      feature.color === "accent"
+                        ? "from-accent/20 to-accent/10"
+                        : "from-primary/20 to-primary/10"
+                    } rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <feature.icon
-                      className={`h-8 w-8 ${feature.color === "accent" ? "text-accent" : "text-primary"}`}
+                      className={`h-8 w-8 ${
+                        feature.color === "accent"
+                          ? "text-accent"
+                          : "text-primary"
+                      }`}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {feature.desc}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -228,7 +274,9 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-primary-foreground">{t("readyToTransform")}</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-primary-foreground">
+            {t("readyToTransform")}
+          </h2>
           <p className="text-xl mb-10 opacity-90 font-light max-w-2xl mx-auto text-primary-foreground">
             {t("experienceFuture")}
           </p>
@@ -254,5 +302,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

@@ -1,7 +1,16 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Award, Heart, Users, Star, Scissors, Sparkles, Clock, MapPin } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Award,
+  Heart,
+  Users,
+  Star,
+  Scissors,
+  Sparkles,
+  Clock,
+  MapPin,
+} from "lucide-react";
 
 const teamMembers = [
   {
@@ -36,7 +45,7 @@ const teamMembers = [
     bio: "David is our men's grooming expert, offering precision cuts and styling services tailored specifically for the modern gentleman.",
     image: "professional male hair stylist cutting men's hair",
   },
-]
+];
 
 const values = [
   {
@@ -63,7 +72,7 @@ const values = [
     description:
       "We stay current with the latest trends and techniques, continuously educating ourselves to offer you the best services.",
   },
-]
+];
 
 export default function AboutPage() {
   return (
@@ -73,20 +82,27 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">Our Story</Badge>
+              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
+                Our Story
+              </Badge>
               <h1 className="text-4xl sm:text-5xl font-bold text-card-foreground mb-6 text-balance">
                 Where Artistry Meets Luxury
               </h1>
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                Founded in 2019, Luxe Salon has been dedicated to providing exceptional hair services in an elegant,
-                welcoming environment. Our team of expert stylists combines years of experience with the latest
-                techniques to create beautiful, personalized looks for every client.
+                Founded in 2019, Luxe Salon has been dedicated to providing
+                exceptional hair services in an elegant, welcoming environment.
+                Our team of expert stylists combines years of experience with
+                the latest techniques to create beautiful, personalized looks
+                for every client.
               </p>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                We believe that great hair is more than just a service—it's an art form that enhances your confidence
-                and expresses your unique personality.
+                We believe that great hair is more than just a service—it's an
+                art form that enhances your confidence and expresses your unique
+                personality.
               </p>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Meet Our Team</Button>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Meet Our Team
+              </Button>
             </div>
             <div className="relative">
               <img
@@ -103,21 +119,31 @@ export default function AboutPage() {
       <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Our Values</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Our Values
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These core principles guide everything we do and shape the experience we create for our clients
+              These core principles guide everything we do and shape the
+              experience we create for our clients
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <Card key={index} className="text-center border-border bg-card hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="text-center border-border bg-card hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <value.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold text-card-foreground mb-3">{value.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
+                  <h3 className="text-xl font-semibold text-card-foreground mb-3">
+                    {value.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {value.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -129,16 +155,21 @@ export default function AboutPage() {
       <section className="py-16 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-4">Meet Our Expert Team</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our talented stylists bring years of experience and passion to every service, ensuring you receive the
-              best care possible
+            <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-4">
+              Meet Our Expert Team
+            </h2>
+            <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
+              Our talented stylists bring years of experience and passion to
+              every service, ensuring you receive the best care possible
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {teamMembers.map((member, index) => (
-              <Card key={index} className="border-border bg-background hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="border-border bg-background hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-0">
                   <div className="flex flex-col sm:flex-row">
                     <div className="sm:w-1/3">
@@ -150,16 +181,30 @@ export default function AboutPage() {
                     </div>
                     <div className="sm:w-2/3 p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-foreground">{member.name}</h3>
-                        <Badge className="bg-accent/10 text-accent border-accent/20">{member.experience}</Badge>
+                        <h3 className="text-xl font-bold text-foreground">
+                          {member.name}
+                        </h3>
+                        <Badge className="bg-accent/10 text-accent border-accent/20">
+                          {member.experience}
+                        </Badge>
                       </div>
-                      <p className="text-primary font-medium mb-3">{member.role}</p>
-                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{member.bio}</p>
+                      <p className="text-primary font-medium mb-3">
+                        {member.role}
+                      </p>
+                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                        {member.bio}
+                      </p>
                       <div className="mb-4">
-                        <h4 className="font-semibold text-foreground mb-2 text-sm">Specialties:</h4>
+                        <h4 className="font-semibold text-foreground mb-2 text-sm">
+                          Specialties:
+                        </h4>
                         <div className="flex flex-wrap gap-2">
                           {member.specialties.map((specialty, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {specialty}
                             </Badge>
                           ))}
@@ -178,9 +223,12 @@ export default function AboutPage() {
       <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Awards & Recognition</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Awards & Recognition
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              We're proud to be recognized for our excellence in hair styling and customer service
+              We're proud to be recognized for our excellence in hair styling
+              and customer service
             </p>
           </div>
 
@@ -188,7 +236,9 @@ export default function AboutPage() {
             <Card className="text-center border-border bg-card">
               <CardContent className="p-8">
                 <Award className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-card-foreground mb-2">Best Salon 2023</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2">
+                  Best Salon 2023
+                </h3>
                 <p className="text-muted-foreground">City Beauty Awards</p>
               </CardContent>
             </Card>
@@ -196,7 +246,9 @@ export default function AboutPage() {
             <Card className="text-center border-border bg-card">
               <CardContent className="p-8">
                 <Star className="h-12 w-12 text-accent mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-card-foreground mb-2">5-Star Rating</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2">
+                  5-Star Rating
+                </h3>
                 <p className="text-muted-foreground">Google Reviews & Yelp</p>
               </CardContent>
             </Card>
@@ -204,8 +256,12 @@ export default function AboutPage() {
             <Card className="text-center border-border bg-card">
               <CardContent className="p-8">
                 <Scissors className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-card-foreground mb-2">Certified Professionals</h3>
-                <p className="text-muted-foreground">Licensed & Insured Stylists</p>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2">
+                  Certified Professionals
+                </h3>
+                <p className="text-muted-foreground">
+                  Licensed & Insured Stylists
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -217,11 +273,15 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-6">Visit Our Salon</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-6">
+                Visit Our Salon
+              </h2>
               <div className="space-y-4 mb-8">
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">123 Beauty Street, Downtown City, ST 12345</span>
+                  <span className="text-muted-foreground">
+                    123 Beauty Street, Downtown City, ST 12345
+                  </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Clock className="h-5 w-5 text-primary" />
@@ -233,10 +293,13 @@ export default function AboutPage() {
                 </div>
               </div>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Our modern salon features state-of-the-art equipment, premium products, and a relaxing atmosphere
-                designed to make your visit as comfortable and enjoyable as possible.
+                Our modern salon features state-of-the-art equipment, premium
+                products, and a relaxing atmosphere designed to make your visit
+                as comfortable and enjoyable as possible.
               </p>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Book Your Visit</Button>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Book Your Visit
+              </Button>
             </div>
             <div className="relative">
               <img
@@ -249,5 +312,5 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
