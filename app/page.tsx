@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/components/language-provider";
+import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
+import { TooltipTrigger } from "@radix-ui/react-tooltip";
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -40,6 +42,25 @@ export default function HomePage() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90"></div>
+
+          <Tooltip open={true}>
+            <TooltipTrigger asChild>
+              <div
+                className="
+        fixed top-16 left-[40%] 
+        w-10 h-10 bg-white/20  rounded-full
+        bounce-anim
+      "
+              ></div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              onClick={handleBooking}
+              className="rounded-xl text-lg font-extralight border shadow-2xl text-black bg-white relative fade-in"
+            >
+              <p>Book Now</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         <div className="relative z-10 flex items-end justify-center h-full pb-20">

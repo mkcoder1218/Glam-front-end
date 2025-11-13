@@ -1,38 +1,44 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Clock } from "lucide-react"
-import { useAppDispatch, useAppSelector } from "@/store/hook"
-import { serviceCategorySlice } from "@/store/slice/service-category"
-import { Skeleton } from "@/components/ui/skeleton"
-import { serviceSlice } from "@/store/slice/service"
-import { encodeQuery } from "@/utils/utils"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { serviceCategorySlice } from "@/store/slice/service-category";
+import { Skeleton } from "@/components/ui/skeleton";
+import { serviceSlice } from "@/store/slice/service";
+import { encodeQuery } from "@/utils/utils";
+import Link from "next/link";
 
 export default function ServicesPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const dispatch = useAppDispatch()
-const discountPromo=useAppSelector((state)=>state.promodiscount)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const discountPromo = useAppSelector((state) => state.promodiscount);
 
-  const categories = useAppSelector((state) => (state.serviceCategory.items as any)?.data)
-  const categoriesLoading = useAppSelector((state) => state.serviceCategory.loading)
+  const categories = useAppSelector(
+    (state) => (state.serviceCategory.items as any)?.data
+  );
+  const categoriesLoading = useAppSelector(
+    (state) => state.serviceCategory.loading
+  );
 
-  const services = useAppSelector((state) => (state.service.items as any)?.data)
-  const servicesLoading = useAppSelector((state) => state.service.loading)
+  const services = useAppSelector(
+    (state) => (state.service.items as any)?.data
+  );
+  const servicesLoading = useAppSelector((state) => state.service.loading);
 
   useEffect(() => {
-    dispatch(serviceCategorySlice.actions.fetchAllServiceCategory())
-  }, [])
+    dispatch(serviceCategorySlice.actions.fetchAllServiceCategory());
+  }, []);
 
   useEffect(() => {
     const query = encodeQuery({
       filters: selectedCategory ? { category_id: selectedCategory } : {},
       include: [{ model: "File", as: "File" }],
-    })
-    dispatch(serviceSlice.actions.fetchAllServices(query))
-  }, [selectedCategory])
+    });
+    dispatch(serviceSlice.actions.fetchAllServices(query));
+  }, [selectedCategory]);
 
   // Loading fallback
   if (!categories || !services) {
@@ -45,57 +51,60 @@ const discountPromo=useAppSelector((state)=>state.promodiscount)
           ))}
         </div>
       </div>
-    )
+    );
   }
-function isDiscountExpired(validUntil: string): boolean {
-  const expiryDate = new Date(validUntil);
-  const today = new Date();
+  function isDiscountExpired(validUntil: string): boolean {
+    const expiryDate = new Date(validUntil);
+    const today = new Date();
 
-  // Set time of both dates to midnight for accurate comparison
-  expiryDate.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
+    // Set time of both dates to midnight for accurate comparison
+    expiryDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
-  return today > expiryDate;
-}
+    return today > expiryDate;
+  }
   const filteredServices = selectedCategory
     ? services.filter((s: any) => s.category_id === selectedCategory)
-    : services
+    : services;
 
   const calculateDiscountedPrice = (price: string, discount: number) => {
-    if (!discount || discount <= 0) return price
-    return (Number(price) * (1 - discount / 100)).toFixed(2)
-  }
+    if (!discount || discount <= 0) return price;
+    return (Number(price) * (1 - discount / 100)).toFixed(2);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Category Filter */}
       <section className="py-6">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap gap-2 justify-center">
-          {categoriesLoading
-            ? Array.from({ length: 4 }).map((_, idx) => (
-                <Skeleton key={idx} className="w-20 h-8 rounded-md" />
-              ))
-            : <>
+          {categoriesLoading ? (
+            Array.from({ length: 4 }).map((_, idx) => (
+              <Skeleton key={idx} className="w-20 h-8 rounded-md" />
+            ))
+          ) : (
+            <>
+              <Button
+                variant={selectedCategory === null ? "default" : "outline"}
+                onClick={() => setSelectedCategory(null)}
+                size="sm"
+              >
+                All
+              </Button>
+              {categories.map((category: any) => (
                 <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(null)}
+                  key={category.id}
+                  variant={
+                    selectedCategory === category.id ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="flex items-center gap-1 text-sm"
                   size="sm"
                 >
-                  All
+                  {category.name}
                 </Button>
-                {categories.map((category: any) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="flex items-center gap-1 text-sm"
-                    size="sm"
-                  >
-                    {category.name}
-                  </Button>
-                ))}
-              </>
-          }
+              ))}
+            </>
+          )}
         </div>
       </section>
 
@@ -111,19 +120,23 @@ function isDiscountExpired(validUntil: string): boolean {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {filteredServices.map((service: any, idx: number) => {
-                console.log('discount',service)
+                console.log("discount", service);
                 const discountedPrice = calculateDiscountedPrice(
-                        service?.price,
-                        !isDiscountExpired(discountPromo?.expiry as any)?discountPromo?.discount:service.discount
-                      );
-                const hasDiscount = !isDiscountExpired(discountPromo?.expiry as any)||service.discount && service.discount > 0
+                  service?.price,
+                  !isDiscountExpired(discountPromo?.expiry as any)
+                    ? discountPromo?.discount
+                    : service.discount
+                );
+                const hasDiscount =
+                  !isDiscountExpired(discountPromo?.expiry as any) ||
+                  (service.discount && service.discount > 0);
 
                 return (
                   <div
                     key={idx}
                     className="bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col"
                   >
-                    <div className="relative h-28 w-full">
+                    <div className="relative h-[250px] w-full">
                       {service.popular && (
                         <Badge className="absolute top-2 right-2 z-10 bg-accent text-accent-foreground text-xs">
                           Popular
@@ -131,8 +144,7 @@ function isDiscountExpired(validUntil: string): boolean {
                       )}
                       <img
                         src={
-                          'http://api.glamnestsalon.com/'+service.File?.path
-                            
+                          "https://api.glamnestsalon.com/" + service.File?.path
                         }
                         crossOrigin="anonymous"
                         alt={service.name}
@@ -157,29 +169,32 @@ function isDiscountExpired(validUntil: string): boolean {
                           {hasDiscount ? (
                             <>
                               <span className="line-through mr-1 text-red-500">
-                                {service.price } ETB
+                                {service.price} ETB
                               </span>
-                              <span>{discountedPrice } ETB</span>
+                              <span>{discountedPrice} ETB</span>
                             </>
                           ) : (
-                            service.price
+                            service.price + " ETB"
                           )}
                         </span>
                       </div>
 
                       <Button className="w-full text-xs py-1 bg-accent hover:bg-accent/90 text-accent-foreground">
-                        <Link href={'/booking'} className="w-full h-full items-center justify-center flex">
+                        <Link
+                          href={"/booking"}
+                          className="w-full h-full items-center justify-center flex"
+                        >
                           Book
                         </Link>
                       </Button>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
         </div>
       </section>
     </div>
-  )
+  );
 }
