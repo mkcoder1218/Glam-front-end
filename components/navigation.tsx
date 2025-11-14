@@ -4,23 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Menu,
-  X,
-  Scissors,
-  Globe,
-  Sun,
-  Moon,
-  LogOut,
-  Coins,
-} from "lucide-react";
+import { Menu, X, Globe, Sun, Moon, LogOut, Coins } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/language-provider";
 import { gsap } from "gsap";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { authSLice } from "@/store/slice/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import CoinsIcon from "./ui/coin";
 import { logout } from "@/store/store";
 import {
   setDiscount,
@@ -34,6 +24,7 @@ const navItems = [
   { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
   { name: "Gallery", href: "/gallery" },
+  { name: "Booking", href: "/booking" },
 ];
 
 export function Navigation() {
@@ -50,12 +41,13 @@ export function Navigation() {
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user profile and points
   useEffect(() => {
     dispatch(authSLice?.actions?.getProfileAuth())
       .unwrap()
       .then((res: any) => {
         setUsername(res.user.name);
-
         dispatch(setuserpoint({ point: res?.user?.point }));
         if (res?.user?.promo_code_id) {
           dispatch(
@@ -74,10 +66,11 @@ export function Navigation() {
         );
       });
   }, []);
+
+  // Initial animations and active link setup
   useEffect(() => {
     setMounted(true);
 
-    // Initial animations when component mounts
     if (navRef.current) {
       gsap.fromTo(
         navRef.current,
@@ -100,7 +93,6 @@ export function Navigation() {
       );
     }
 
-    // Set active state for current page
     const activeLinks = document.querySelectorAll(".nav-link");
     activeLinks.forEach((link) => {
       const href = link.getAttribute("href");
@@ -109,45 +101,42 @@ export function Navigation() {
 
       if (isActive) {
         link.classList.add("text-primary");
-        if (underline) {
-          gsap.set(underline, { scaleX: 1 });
-        }
+        if (underline) gsap.set(underline, { scaleX: 1 });
         link.setAttribute("aria-current", "page");
       } else {
         link.classList.remove("text-primary");
-        if (underline) {
-          gsap.set(underline, { scaleX: 0 });
-        }
+        if (underline) gsap.set(underline, { scaleX: 0 });
         link.removeAttribute("aria-current");
       }
     });
   }, [pathname]);
 
-  const handleLanguageToggle = () => {
+  // Click outside mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        isOpen
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  const handleLanguageToggle = () =>
     setLanguage(language === "en" ? "am" : "en");
-  };
+  const handleThemeToggle = () => setTheme(theme === "dark" ? "light" : "dark");
 
-  const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  // Animation functions for hover effects
   const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const target = e.currentTarget;
     const underline = target.querySelector(".nav-underline") as HTMLElement;
-    if (underline) {
-      gsap.to(underline, {
-        scaleX: 1,
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    }
-    gsap.to(target, {
-      y: -2,
-      duration: 0.2,
-      ease: "power1.out",
-    });
-    // Add CSS class for color change
+    if (underline)
+      gsap.to(underline, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+    gsap.to(target, { y: -2, duration: 0.2, ease: "power1.out" });
     target.classList.add("text-primary");
   };
 
@@ -155,37 +144,24 @@ export function Navigation() {
     const target = e.currentTarget;
     const underline = target.querySelector(".nav-underline") as HTMLElement;
     const isActive = target.getAttribute("aria-current") === "page";
-
-    if (underline) {
+    if (underline)
       gsap.to(underline, {
         scaleX: isActive ? 1 : 0,
         duration: 0.3,
         ease: "power2.out",
       });
-    }
-    gsap.to(target, {
-      y: 0,
-      duration: 0.2,
-      ease: "power1.out",
-    });
-    // Remove CSS class for color change if not active
-    if (!isActive) {
-      target.classList.remove("text-primary");
-    }
+    gsap.to(target, { y: 0, duration: 0.2, ease: "power1.out" });
+    if (!isActive) target.classList.remove("text-primary");
   };
 
   const handleMobileMenuToggle = () => {
     setIsOpen(!isOpen);
-
     if (!isOpen && menuRef.current) {
-      // Opening animation
       gsap.fromTo(
         menuRef.current,
         { opacity: 0, y: -20, scale: 0.95 },
         { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" }
       );
-
-      // Stagger animation for menu items
       const menuItems = menuRef.current.querySelectorAll("a, button");
       gsap.fromTo(
         menuItems,
@@ -202,37 +178,28 @@ export function Navigation() {
     }
   };
 
-  // Button animation functions
-  const handleButtonHover = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget;
-    gsap.to(target, {
+  const handleButtonHover = (e: React.MouseEvent<HTMLElement>) =>
+    gsap.to(e.currentTarget, {
       scale: 1.05,
       y: -2,
       duration: 0.2,
       ease: "power2.out",
     });
-  };
-
-  const handleButtonLeave = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget;
-    gsap.to(target, {
+  const handleButtonLeave = (e: React.MouseEvent<HTMLElement>) =>
+    gsap.to(e.currentTarget, {
       scale: 1,
       y: 0,
       duration: 0.2,
       ease: "power2.out",
     });
-  };
-
-  const handleButtonClick = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget;
-    gsap.to(target, {
+  const handleButtonClick = (e: React.MouseEvent<HTMLElement>) =>
+    gsap.to(e.currentTarget, {
       scale: 0.95,
       duration: 0.1,
       ease: "power2.out",
       yoyo: true,
       repeat: 1,
     });
-  };
 
   return (
     <nav
@@ -253,51 +220,18 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className="relative text-foreground font-medium nav-link transition-colors duration-200"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {t("home")}
-              <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
-            </Link>
-            <Link
-              href="/about"
-              className="relative text-foreground font-medium nav-link transition-colors duration-200"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {t("about")}
-              <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
-            </Link>
-            <Link
-              href="/services"
-              className="relative text-foreground font-medium nav-link transition-colors duration-200"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {t("services")}
-              <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
-            </Link>
-            <Link
-              href="/gallery"
-              className="relative text-foreground font-medium nav-link transition-colors duration-200"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {t("gallery")}
-              <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
-            </Link>
-            <Link
-              href="/booking"
-              className="relative text-foreground font-medium nav-link transition-colors duration-200"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {t("booking")}
-              <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="relative text-foreground font-medium nav-link transition-colors duration-200"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                {t(item.name.toLowerCase())}
+                <span className="nav-underline absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-left"></span>
+              </Link>
+            ))}
 
             <Button
               variant="ghost"
@@ -305,7 +239,7 @@ export function Navigation() {
               onClick={handleLanguageToggle}
               className="text-foreground hover:text-primary"
             >
-              <Globe className="h-4 w-4 mr-1" />
+              <Globe className="h-4 w-4 mr-1" />{" "}
               {language === "en" ? "አማ" : "EN"}
             </Button>
 
@@ -337,7 +271,7 @@ export function Navigation() {
                   </span>
                 </div>
                 <div className="flex gap-1 items-center text-xs text-orange-300">
-                  <Coins className="" />
+                  <Coins />
                   {coin || 0}
                 </div>
                 <Button
@@ -369,6 +303,7 @@ export function Navigation() {
                 </Link>
                 <Link href="/signup">
                   <Button
+                    size="sm"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     onMouseEnter={handleButtonHover}
                     onMouseLeave={handleButtonLeave}
@@ -391,7 +326,7 @@ export function Navigation() {
             >
               {username && (
                 <div className="flex gap-1 items-center text-lg text-orange-300">
-                  <Coins className="" />
+                  <Coins />
                   {coin || 0}
                 </div>
               )}
@@ -411,41 +346,16 @@ export function Navigation() {
               ref={menuRef}
               className="px-2 pt-2 pb-3 space-y-1 bg-card rounded-lg mt-2 border border-border"
             >
-              <Link
-                href="/"
-                className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("home")}
-              </Link>
-              <Link
-                href="/about"
-                className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("about")}
-              </Link>
-              <Link
-                href="/services"
-                className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("services")}
-              </Link>
-              <Link
-                href="/gallery"
-                className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("gallery")}
-              </Link>
-              <Link
-                href="/booking"
-                className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("booking")}
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block px-3 py-2 text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors duration-200"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {t(item.name.toLowerCase())}
+                </Link>
+              ))}
 
               <div className="flex gap-2 px-3 py-2">
                 <Button
@@ -454,7 +364,7 @@ export function Navigation() {
                   onClick={handleLanguageToggle}
                   className="text-foreground hover:text-primary flex-1"
                 >
-                  <Globe className="h-4 w-4 mr-1" />
+                  <Globe className="h-4 w-4 mr-1" />{" "}
                   {language === "en" ? "አማ" : "EN"}
                 </Button>
                 <Button

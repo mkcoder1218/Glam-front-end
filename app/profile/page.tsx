@@ -57,14 +57,16 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfileAndBookings = async () => {
       try {
-        
         const profileRes = await dispatch(
           authSLice.actions.getProfileAuth()
         ).unwrap();
         setUserProfile(profileRes.user);
 
         const query = encodeQuery({
-          include: [{ model: "Booking", as: "Booking" }, { model: "Service" }],
+          include: [
+            { model: "Booking", as: "Booking" },
+            { model: "Service", as: "service" },
+          ],
         });
 
         const bookingsRes = await dispatch(
@@ -143,7 +145,7 @@ export default function ProfilePage() {
                 </span>{" "}
                 <div className="flex gap-1 items-center text-xs text-orange-700">
                   <Coins className="" />
-                  {userProfile?.point||'0'}
+                  {userProfile?.point || "0"}
                 </div>
               </div>
               <div className="flex gap-1">
@@ -152,7 +154,7 @@ export default function ProfilePage() {
                 </span>{" "}
                 <div className="flex gap-1 items-center text-xs text-orange-700">
                   <Gift className="" />
-                  {(userProfile as any)?.promoCode?.code||'No promo code'}
+                  {(userProfile as any)?.promoCode?.code || "No promo code"}
                 </div>
               </div>
 
