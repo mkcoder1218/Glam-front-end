@@ -28,8 +28,7 @@ import { bookingApi, bookingServicesApi } from "@/store/api/booking";
 import { authSLice } from "@/store/slice/auth";
 import { serviceCategorySlice } from "@/store/slice/service-category";
 import { serviceTypeSlice } from "@/store/slice/service-type";
-import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
-import { DialogOverlay } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import axios from "axios";
 import { setDiscount, setuserpoint } from "@/store/slice/setDisacount";
 
@@ -60,6 +59,12 @@ const timeSlots = [
 
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
+
+  // SCROLL TO TOP ON EVERY STEP CHANGE
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep]);
+
   // People & services
   const [numPeople, setNumPeople] = useState(1);
   const [peopleServices, setPeopleServices] = useState<
@@ -100,8 +105,10 @@ export default function BookingPage() {
     (state) => state?.promodiscount?.reedemAmount
   );
   const [wantToReedem, setWanttoReedem] = useState(false);
-  console.log("Reedem Amount", ReedeemAmount, "user Point", userPoints);
   const [openModal, setOpenModal] = useState(false);
+  const [formData, setFormData] = useState({ date: "", time: "" });
+  const [promoCode, setPromoCode] = useState("");
+  const totalSteps = 3;
 
   useEffect(() => {
     if (ReedeemAmount && ReedeemAmount > 0 && userPoints && userPoints > 0) {
@@ -112,20 +119,15 @@ export default function BookingPage() {
       }
     }
   }, [ReedeemAmount, userPoints]);
-  const [formData, setFormData] = useState({ date: "", time: "" });
-  const [promoCode, setPromoCode] = useState("");
-  const totalSteps = 3;
-  console.log("discount promo", discountPromo);
+
   function isDiscountExpired(validUntil: string): boolean {
     const expiryDate = new Date(validUntil);
     const today = new Date();
-
-    // Set time of both dates to midnight for accurate comparison
     expiryDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
-
     return today > expiryDate;
   }
+
   const animateSelection = (element: HTMLElement) => {
     gsap.to(element, {
       scale: 0.95,
@@ -150,9 +152,8 @@ export default function BookingPage() {
     dispatch(serviceTypeSlice.actions.fetchAllCategorytype());
   }, [dispatch]);
 
-  // Fetch services with combined filters from all people
+  // Fetch services with combined filters
   useEffect(() => {
-    // Combine filters from all people
     const allCategoryIds = Object.values(peopleServices)
       .map((person) => person.selectedCategory)
       .filter(Boolean) as string[];
@@ -162,15 +163,8 @@ export default function BookingPage() {
       .filter(Boolean) as string[];
 
     const filters: any = {};
-
-    // If any person has selected categories/types, apply them as OR filters
-    if (allCategoryIds.length > 0) {
-      filters.category_id = allCategoryIds;
-    }
-
-    if (allTypeIds.length > 0) {
-      filters.type_id = allTypeIds;
-    }
+    if (allCategoryIds.length > 0) filters.category_id = allCategoryIds;
+    if (allTypeIds.length > 0) filters.type_id = allTypeIds;
 
     const query = encodeQuery({
       filters: Object.keys(filters).length > 0 ? filters : {},
@@ -181,12 +175,10 @@ export default function BookingPage() {
     dispatch(serviceSlice.actions.fetchAllServices(query));
   }, [peopleServices, page, dispatch]);
 
-  // Animate on step change
+  // Animate content on step change
   useEffect(() => {
     const content = document.querySelector(".step-content");
-    if (content) {
-      animateFadeIn(content as HTMLElement);
-    }
+    if (content) animateFadeIn(content as HTMLElement);
   }, [currentStep]);
 
   const isPerWig = (service: any) =>
@@ -209,10 +201,7 @@ export default function BookingPage() {
       }
       return {
         ...prev,
-        [personIndex]: {
-          ...current,
-          selectedServices,
-        },
+        [personIndex]: { ...current, selectedServices },
       };
     });
   };
@@ -238,6 +227,7 @@ export default function BookingPage() {
     if (!discount || discount <= 0) return price;
     return (Number(price) * (1 - discount / 100)).toFixed(2);
   };
+
   const handlePersonTypeChange = (
     personIndex: number,
     type: "Adult" | "Child"
@@ -260,10 +250,10 @@ export default function BookingPage() {
       [personIndex]: {
         ...prev[personIndex],
         selectedCategory: categoryId,
-        selectedType: null, // Reset type when category changes
+        selectedType: null,
       },
     }));
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
   };
 
   const handleTypeChange = (personIndex: number, typeId: string | null) => {
@@ -274,11 +264,10 @@ export default function BookingPage() {
         selectedType: typeId,
       },
     }));
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
   };
 
   const handleNext = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
     if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
   };
 
@@ -296,7 +285,6 @@ export default function BookingPage() {
           Object.entries(selectedServices).forEach(([serviceId, quantity]) => {
             const service = services.find((s: any) => s.id === serviceId);
             if (service) {
-              // Calculate discounted price for each service
               const discountedPrice = calculateDiscountedPrice(
                 service?.price,
                 !isDiscountExpired(discountPromo?.expiry as any)
@@ -307,7 +295,7 @@ export default function BookingPage() {
               for (let i = 0; i < quantity; i++) {
                 bookingServicesPayload.push({
                   service_id: service.id,
-                  price: discountedPrice, // Use discounted price instead of original
+                  price: discountedPrice,
                   duration: service.duration,
                   person_type: personType,
                 });
@@ -359,14 +347,15 @@ export default function BookingPage() {
       }
 
       showSuccessToast("Booking successfully created!");
-      setCurrentStep(4); // success step
+      setCurrentStep(4);
+
       if (wantToReedem) {
         await axios
           .post(
             `http://api.glamnestsalon.com/api/booking/${user?.user?.id}/reedem`
           )
           .then(() => {
-            dispatch(authSLice?.actions?.getProfileAuth())
+            dispatch(authSLice.actions.getProfileAuth())
               .unwrap()
               .then((res: any) => {
                 dispatch(setuserpoint({ point: res?.user?.point }));
@@ -381,8 +370,7 @@ export default function BookingPage() {
                 setWanttoReedem(false);
               });
           });
-
-        showSuccessToast("Booking successfully created and points redeemed!");
+        showSuccessToast("Points redeemed successfully!");
       }
     } catch (error) {
       console.error(error);
@@ -406,7 +394,6 @@ export default function BookingPage() {
     }
   };
 
-  // Get filtered services for a specific person based on their filters
   const getFilteredServicesForPerson = (personIndex: number) => {
     const person = peopleServices[personIndex];
     if (!person) return services;
@@ -434,6 +421,7 @@ export default function BookingPage() {
                 Choose how many people and assign one or more services to each
               </p>
             </div>
+
             {/* Number of people */}
             <div className="flex items-center gap-4 mb-4 p-2 bg-white/50 backdrop-blur-sm rounded-xl border border-border/50">
               <Users className="h-5 w-5 text-primary" />
@@ -443,15 +431,7 @@ export default function BookingPage() {
                 onValueChange={(val) => {
                   const n = parseInt(val);
                   setNumPeople(n);
-                  const updated: Record<
-                    number,
-                    {
-                      personType: "Adult" | "Child";
-                      selectedServices: Record<string, number>;
-                      selectedCategory: string | null;
-                      selectedType: string | null;
-                    }
-                  > = {};
+                  const updated: typeof peopleServices = {};
                   for (let i = 1; i <= n; i++) {
                     updated[i] = peopleServices[i] || {
                       personType: "Adult" as const,
@@ -498,7 +478,6 @@ export default function BookingPage() {
 
                   {/* Person type and filters */}
                   <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-white rounded-xl shadow-sm border">
-                    {/* Person type */}
                     <div className="flex gap-4 justify-between w-full">
                       <div className="flex gap-2">
                         {(["Adult", "Child"] as const).map((type) => (
@@ -529,7 +508,7 @@ export default function BookingPage() {
                         ))}
                       </div>
                     </div>
-                    {/* Category filter for this person */}
+
                     <div className="self-end">
                       <Select
                         value={person.selectedCategory ?? "all"}
@@ -554,7 +533,6 @@ export default function BookingPage() {
                       </Select>
                     </div>
 
-                    {/* Type filter for this person */}
                     {person.selectedCategory && (
                       <div className="flex-1">
                         <Select
@@ -588,7 +566,7 @@ export default function BookingPage() {
                     )}
                   </div>
 
-                  {/* Services grid for this person */}
+                  {/* Services grid */}
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     {personServices.map((service: any) => {
                       const selected = !!person.selectedServices[service.id];
@@ -650,30 +628,25 @@ export default function BookingPage() {
                                 </div>
 
                                 <span className="font-semibold text-primary">
-                                  {wantToReedem &&
-                                    service.product_price > 0 && (
-                                      <>
-                                        <span className="line-through  mr-1 text-red-500">
-                                          {service.price} ETB
-                                        </span>
-                                        <span>{service.product_price} ETB</span>
-                                      </>
-                                    )}
+                                  {wantToReedem && service.product_price > 0 ? (
+                                    <>
+                                      <span className="line-through mr-1 text-red-500">
+                                        {service.price} ETB
+                                      </span>
+                                      <span>{service.product_price} ETB</span>
+                                    </>
+                                  ) : hasDiscount ? (
+                                    <>
+                                      <span className="line-through mr-1 text-red-500">
+                                        {service.price} ETB
+                                      </span>
+                                      <span>{discountedPrice} ETB</span>
+                                    </>
+                                  ) : (
+                                    service.price + " ETB"
+                                  )}
                                 </span>
-                                {!wantToReedem && service.product_price > 0 && (
-                                  <span className="font-semibold text-primary">
-                                    {hasDiscount ? (
-                                      <>
-                                        <span className="line-through  mr-1 text-red-500">
-                                          {service.price} ETB
-                                        </span>
-                                        <span>{discountedPrice} ETB</span>
-                                      </>
-                                    ) : (
-                                      service.price + " ETB"
-                                    )}
-                                  </span>
-                                )}
+
                                 <p
                                   title={service?.description}
                                   className={`text-sm mt-2 ${
@@ -692,7 +665,6 @@ export default function BookingPage() {
                     })}
                   </div>
 
-                  {/* No services message */}
                   {personServices.length === 0 && (
                     <div className="text-center p-8 bg-muted/50 rounded-xl">
                       <p className="text-muted-foreground">
@@ -701,7 +673,7 @@ export default function BookingPage() {
                     </div>
                   )}
 
-                  {/* Selected Services for this person */}
+                  {/* Selected Services Summary */}
                   {Object.keys(person.selectedServices).length > 0 && (
                     <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green/20">
                       <CardContent className="p-6">
@@ -719,8 +691,6 @@ export default function BookingPage() {
 
                               const perWig = isPerWig(service);
                               const displayQuantity = perWig ? quantity : 1;
-
-                              // Calculate discounted price
                               const discountedPrice = calculateDiscountedPrice(
                                 service?.price,
                                 !isDiscountExpired(discountPromo?.expiry as any)
@@ -768,7 +738,7 @@ export default function BookingPage() {
                                         </span>
                                         {hasDiscount && (
                                           <span className="text-xs text-red-500 font-semibold">
-                                            You save:{" "}
+                                            Save:{" "}
                                             {(
                                               originalPrice - displayPrice
                                             ).toFixed(2)}{" "}
@@ -782,15 +752,13 @@ export default function BookingPage() {
                                         <span className="font-bold text-xl text-green-700">
                                           {productPrice} ETB
                                         </span>
-                                        {
-                                          <span className="text-xs text-red-500 font-semibold">
-                                            You save:{" "}
-                                            {(
-                                              originalPrice - productPrice
-                                            ).toFixed(2)}{" "}
-                                            ETB
-                                          </span>
-                                        }
+                                        <span className="text-xs text-red-500 font-semibold">
+                                          Save:{" "}
+                                          {(
+                                            originalPrice - productPrice
+                                          ).toFixed(2)}{" "}
+                                          ETB
+                                        </span>
                                       </div>
                                     )}
                                     {perWig && (
@@ -840,7 +808,6 @@ export default function BookingPage() {
                 variant="outline"
                 disabled={page === 1}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                className="hover:bg-primary/5 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
@@ -852,7 +819,6 @@ export default function BookingPage() {
                 variant="outline"
                 disabled={page * limit >= totalServices}
                 onClick={() => setPage((prev) => prev + 1)}
-                className="hover:bg-primary/5 transition-colors"
               >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -860,6 +826,7 @@ export default function BookingPage() {
             </div>
           </div>
         );
+
       case 2:
         return (
           <div className="space-y-6 step-content">
@@ -891,7 +858,7 @@ export default function BookingPage() {
                   }`}
                   onClick={(e) => {
                     animateSelection(e.currentTarget as HTMLElement);
-                    setFormData({ ...formData, time: time });
+                    setFormData({ ...formData, time });
                   }}
                 >
                   <Clock className="h-4 w-4 mr-2" />
@@ -901,6 +868,7 @@ export default function BookingPage() {
             </div>
           </div>
         );
+
       case 3:
         return (
           <div className="space-y-6 step-content text-center">
@@ -974,6 +942,7 @@ export default function BookingPage() {
             </Card>
           </div>
         );
+
       case 4:
         return (
           <div className="space-y-6 step-content text-center">
@@ -994,47 +963,47 @@ export default function BookingPage() {
             </Button>
           </div>
         );
+
       default:
         return null;
     }
   };
+
   const renderModal = () => {
     return (
       <Dialog open={openModal} onOpenChange={setOpenModal}>
-        <DialogOverlay
-          onClick={() => {
-            setWanttoReedem(false);
-            setOpenModal(false);
-          }}
-        />
         <DialogContent>
-          <div className="">
-            You reached the point reedem stage do you want to Reedem?
-          </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => {
-                setWanttoReedem(true);
-                setOpenModal(false);
-              }}
-              className="bg-amber-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 text-gray-50 hover:text-black cursor-pointer"
-            >
-              Yes
-            </Button>
-            <Button
-              onClick={() => setOpenModal(false)}
-              className="bg-red-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 hover:text-black cursor-pointer"
-            >
-              No
-            </Button>
+          <div className="text-center space-y-6">
+            <div className="mx-auto w-fit">
+              <Gift className="h-16 w-16 text-amber-500" />
+            </div>
+            <p className="text-lg">
+              You have enough points to redeem a discount! Do you want to use
+              them?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={() => {
+                  setWanttoReedem(true);
+                  setOpenModal(false);
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
+                Yes, Redeem!
+              </Button>
+              <Button variant="outline" onClick={() => setOpenModal(false)}>
+                No, Thanks
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
     );
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="">{renderModal()}</div>
+      {renderModal()}
       <section className="py-16 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
@@ -1070,9 +1039,11 @@ export default function BookingPage() {
               ))}
             </div>
           )}
+
           <Card className="overflow-hidden shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="p-0">{renderStepContent()}</CardContent>
           </Card>
+
           {/* Navigation */}
           {currentStep <= 3 && (
             <div className="flex justify-between mt-8 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-border/50">
@@ -1085,6 +1056,7 @@ export default function BookingPage() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
+
               {currentStep < totalSteps ? (
                 <Button
                   onClick={handleNext}
