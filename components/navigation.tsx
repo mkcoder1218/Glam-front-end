@@ -396,9 +396,7 @@ export function Navigation() {
                         {username}
                       </span>
                     </div>
-                    <div className="">
-                      <Coins className="text-black" />
-                    </div>
+
                     <Button
                       variant="ghost"
                       size="sm"
