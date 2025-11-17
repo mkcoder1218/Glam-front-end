@@ -95,21 +95,23 @@ export default function BookingPage() {
     [];
   const serviceTypes =
     useAppSelector((state) => (state?.serviceType?.items as any)?.data) || [];
-  const userPoints=useAppSelector((state)=>state?.promodiscount?.point)
-  const ReedeemAmount=useAppSelector((state)=>state?.promodiscount?.reedemAmount)
-  const [wantToReedem,setWanttoReedem]=useState(false)
-  console.log('Reedem Amount',ReedeemAmount,'user Point',userPoints)
-  const [openModal,setOpenModal]=useState(false)
+  const userPoints = useAppSelector((state) => state?.promodiscount?.point);
+  const ReedeemAmount = useAppSelector(
+    (state) => state?.promodiscount?.reedemAmount
+  );
+  const [wantToReedem, setWanttoReedem] = useState(false);
+  console.log("Reedem Amount", ReedeemAmount, "user Point", userPoints);
+  const [openModal, setOpenModal] = useState(false);
 
-  useEffect(()=>{
-    if(ReedeemAmount&&ReedeemAmount>0&&userPoints&&userPoints>0){
-    if(ReedeemAmount<=userPoints){
-      setOpenModal(true)
-    }else{
-      setOpenModal(false)
+  useEffect(() => {
+    if (ReedeemAmount && ReedeemAmount > 0 && userPoints && userPoints > 0) {
+      if (ReedeemAmount <= userPoints) {
+        setOpenModal(true);
+      } else {
+        setOpenModal(false);
+      }
     }
-  }
-  },[ReedeemAmount,userPoints])
+  }, [ReedeemAmount, userPoints]);
   const [formData, setFormData] = useState({ date: "", time: "" });
   const [promoCode, setPromoCode] = useState("");
   const totalSteps = 3;
@@ -276,8 +278,8 @@ export default function BookingPage() {
   };
 
   const handleNext = () => {
- window.scrollTo({ top: 0, behavior: "smooth" });
-     if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
   };
 
   const handlePrevious = () => {
@@ -358,22 +360,30 @@ export default function BookingPage() {
 
       showSuccessToast("Booking successfully created!");
       setCurrentStep(4); // success step
-if(wantToReedem){
-  
-    await axios.post(`http://api.glamnestsalon.com/api/booking/${user?.user?.id}/reedem`).then(()=>{dispatch(authSLice?.actions?.getProfileAuth())
-      .unwrap()
-      .then((res: any) => {
-        dispatch(setuserpoint({point:res?.user?.point}))
-        if(res?.user?.promo_code_id){
-        dispatch(setDiscount({discount:res?.user?.promoCode?.discount,expiry:res?.user?.promoCode?.valid_until}))
-        }
-        setWanttoReedem(false)
+      if (wantToReedem) {
+        await axios
+          .post(
+            `http://api.glamnestsalon.com/api/booking/${user?.user?.id}/reedem`
+          )
+          .then(() => {
+            dispatch(authSLice?.actions?.getProfileAuth())
+              .unwrap()
+              .then((res: any) => {
+                dispatch(setuserpoint({ point: res?.user?.point }));
+                if (res?.user?.promo_code_id) {
+                  dispatch(
+                    setDiscount({
+                      discount: res?.user?.promoCode?.discount,
+                      expiry: res?.user?.promoCode?.valid_until,
+                    })
+                  );
+                }
+                setWanttoReedem(false);
+              });
+          });
+
+        showSuccessToast("Booking successfully created and points redeemed!");
       }
-    
-    );});
-      
-    showSuccessToast("Booking successfully created and points redeemed!");
-}
     } catch (error) {
       console.error(error);
       showErrorToast("Error creating booking.");
@@ -607,14 +617,15 @@ if(wantToReedem){
                         >
                           <CardContent className="p-0">
                             <div className="flex flex-col">
-                              <div className="">
+                              <div className="w-full h-72 overflow-hidden rounded-lg flex items-center justify-center">
                                 <img
-                                  className="w-full h-[200px] rounded-lg"
-                                  src={`http://api.glamnestsalon.com/${service?.File?.path}`}
+                                  className="w-full h-full object-cover object-center"
+                                  src={`https://api.glamnestsalon.com/${service?.File?.path}`}
                                   crossOrigin="anonymous"
-                                  alt=""
+                                  alt={service?.File?.name || "Service Image"}
                                 />
                               </div>
+
                               <div className="col-span-2 px-2 py-2">
                                 <div className="flex justify-between items-start mb-3">
                                   <h3
@@ -639,27 +650,30 @@ if(wantToReedem){
                                 </div>
 
                                 <span className="font-semibold text-primary">
-                                  {wantToReedem&&service.product_price>0&& (
-                                    <>
-                                      <span className="line-through  mr-1 text-red-500">
-                                        {service.price} ETB
-                                      </span>
-                                      <span>{service.product_price} ETB</span>
-                                    </>
-                                  ) }
+                                  {wantToReedem &&
+                                    service.product_price > 0 && (
+                                      <>
+                                        <span className="line-through  mr-1 text-red-500">
+                                          {service.price} ETB
+                                        </span>
+                                        <span>{service.product_price} ETB</span>
+                                      </>
+                                    )}
                                 </span>
-                               {!wantToReedem&&service.product_price>0&& <span className="font-semibold text-primary">
-                                  {hasDiscount ? (
-                                    <>
-                                      <span className="line-through  mr-1 text-red-500">
-                                        {service.price} ETB
-                                      </span>
-                                      <span>{discountedPrice} ETB</span>
-                                    </>
-                                  ) : (
-                                    service.price + " ETB"
-                                  )}
-                                </span>}
+                                {!wantToReedem && service.product_price > 0 && (
+                                  <span className="font-semibold text-primary">
+                                    {hasDiscount ? (
+                                      <>
+                                        <span className="line-through  mr-1 text-red-500">
+                                          {service.price} ETB
+                                        </span>
+                                        <span>{discountedPrice} ETB</span>
+                                      </>
+                                    ) : (
+                                      service.price + " ETB"
+                                    )}
+                                  </span>
+                                )}
                                 <p
                                   title={service?.description}
                                   className={`text-sm mt-2 ${
@@ -716,8 +730,7 @@ if(wantToReedem){
                               const hasDiscount =
                                 !isDiscountExpired(
                                   discountPromo?.expiry as any
-                                ) ||
-                                ( service.discount > 0);
+                                ) || service.discount > 0;
 
                               const displayPrice =
                                 Number(discountedPrice) * displayQuantity;
@@ -736,46 +749,50 @@ if(wantToReedem){
                                       {service.name}{" "}
                                       {perWig && `(x${quantity})`}
                                     </span>
-                                    {!wantToReedem&&hasDiscount && (
+                                    {!wantToReedem && hasDiscount && (
                                       <span className="text-xs text-muted-foreground line-through">
                                         Original: {originalPrice} ETB
                                       </span>
                                     )}
-                                    {wantToReedem&&hasDiscount && (
+                                    {wantToReedem && hasDiscount && (
                                       <span className="text-xs text-muted-foreground line-through">
                                         Original: {productPrice} ETB
                                       </span>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-3">
-                                   {!wantToReedem&& <div className="flex flex-col items-end">
-                                      <span className="font-bold text-xl text-green-700">
-                                        {displayPrice} ETB
-                                      </span>
-                                      {hasDiscount && (
-                                        <span className="text-xs text-red-500 font-semibold">
-                                          You save:{" "}
-                                          {(
-                                            originalPrice - displayPrice
-                                          ).toFixed(2)}{" "}
-                                          ETB
+                                    {!wantToReedem && (
+                                      <div className="flex flex-col items-end">
+                                        <span className="font-bold text-xl text-green-700">
+                                          {displayPrice} ETB
                                         </span>
-                                      )}
-                                    </div>}
-                                   {wantToReedem&& <div className="flex flex-col items-end">
-                                      <span className="font-bold text-xl text-green-700">
-                                        {productPrice} ETB
-                                      </span>
-                                      { (
-                                        <span className="text-xs text-red-500 font-semibold">
-                                          You save:{" "}
-                                          {(
-                                            originalPrice - productPrice
-                                          ).toFixed(2)}{" "}
-                                          ETB
+                                        {hasDiscount && (
+                                          <span className="text-xs text-red-500 font-semibold">
+                                            You save:{" "}
+                                            {(
+                                              originalPrice - displayPrice
+                                            ).toFixed(2)}{" "}
+                                            ETB
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {wantToReedem && (
+                                      <div className="flex flex-col items-end">
+                                        <span className="font-bold text-xl text-green-700">
+                                          {productPrice} ETB
                                         </span>
-                                      )}
-                                    </div>}
+                                        {
+                                          <span className="text-xs text-red-500 font-semibold">
+                                            You save:{" "}
+                                            {(
+                                              originalPrice - productPrice
+                                            ).toFixed(2)}{" "}
+                                            ETB
+                                          </span>
+                                        }
+                                      </div>
+                                    )}
                                     {perWig && (
                                       <Select
                                         value={String(quantity)}
@@ -981,30 +998,44 @@ if(wantToReedem){
         return null;
     }
   };
-const renderModal=()=>{
- return( <Dialog open={openModal} onOpenChange={setOpenModal}>
-  <DialogOverlay onClick={()=>{
-          setWanttoReedem(false)
-          setOpenModal(false)
-        }} />
-    <DialogContent>
-   
-      <div className="">You reached the point reedem stage do you want to Reedem?</div>
-      <div className="flex gap-3">
-        <Button onClick={()=>{
-          setWanttoReedem(true)
-          setOpenModal(false)
-        }} className="bg-amber-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 text-gray-50 hover:text-black cursor-pointer">Yes</Button>
-        <Button onClick={()=>setOpenModal(false)} className="bg-red-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 hover:text-black cursor-pointer">No</Button>
-      </div>
-    </DialogContent>
-  </Dialog>)
-}
+  const renderModal = () => {
+    return (
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogOverlay
+          onClick={() => {
+            setWanttoReedem(false);
+            setOpenModal(false);
+          }}
+        />
+        <DialogContent>
+          <div className="">
+            You reached the point reedem stage do you want to Reedem?
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setWanttoReedem(true);
+                setOpenModal(false);
+              }}
+              className="bg-amber-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 text-gray-50 hover:text-black cursor-pointer"
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={() => setOpenModal(false)}
+              className="bg-red-500 rounded-md hover:bg-transparent hover:border transition-all duration-300 hover:text-black cursor-pointer"
+            >
+              No
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <div className="">{renderModal()}</div>
+      <div className="">{renderModal()}</div>
       <section className="py-16 relative overflow-hidden">
-
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple/5 rounded-full blur-3xl"></div>

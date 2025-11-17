@@ -384,7 +384,7 @@ export function Navigation() {
               <div className="px-3 py-2">
                 {username ? (
                   <div className="flex items-center gap-4">
-                    <Link href="/profile">
+                    <Link href="/profile" onClick={() => setIsOpen(false)}>
                       <Avatar className="h-8 w-8 cursor-pointer">
                         <AvatarImage src="/placeholder-user.jpg" />
                         <AvatarFallback>{username.charAt(0)}</AvatarFallback>
@@ -405,7 +405,9 @@ export function Navigation() {
                       className="text-foreground hover:text-primary"
                       onClick={() => {
                         localStorage.clear();
-                        router.refresh();
+                        setTimeout(() => {
+                          window.location.href = "/";
+                        }, 1000);
                       }}
                     >
                       <LogOut />
@@ -413,7 +415,11 @@ export function Navigation() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <Link href="/login" className="flex-1">
+                    <Link
+                      href="/login"
+                      className="flex-1"
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Button
                         variant="ghost"
                         size="sm"
@@ -425,7 +431,11 @@ export function Navigation() {
                         {t("signIn")}
                       </Button>
                     </Link>
-                    <Link href="/signup" className="flex-1">
+                    <Link
+                      href="/signup"
+                      className="flex-1"
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Button
                         size="sm"
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
