@@ -408,6 +408,7 @@ export function Navigation() {
                         }, 1000);
                       }}
                     >
+                      Log out
                       <LogOut />
                     </Button>
                   </div>
