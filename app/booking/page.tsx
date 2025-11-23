@@ -227,6 +227,37 @@ export default function BookingPage() {
     if (!discount || discount <= 0) return price;
     return (Number(price) * (1 - discount / 100)).toFixed(2);
   };
+  const resetBookingForm = () => {
+    setCurrentStep(1);
+
+    // reset number of people
+    setNumPeople(1);
+
+    // reset people services
+    setPeopleServices({
+      1: {
+        personType: "Adult",
+        selectedServices: {},
+        selectedCategory: null,
+        selectedType: null,
+      },
+    });
+
+    // reset pagination
+    setPage(1);
+
+    // reset date & time
+    setFormData({ date: "", time: "" });
+
+    // reset promo code
+    setPromoCode("");
+
+    // reset redeem state
+    setWanttoReedem(false);
+
+    // reset modal
+    setOpenModal(false);
+  };
 
   const handlePersonTypeChange = (
     personIndex: number,
@@ -956,7 +987,10 @@ export default function BookingPage() {
               Your booking has been created successfully. We'll see you soon!
             </p>
             <Button
-              onClick={() => setCurrentStep(1)}
+              onClick={() => {
+                setCurrentStep(1);
+                resetBookingForm();
+              }}
               className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all"
             >
               Make Another Booking
