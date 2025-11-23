@@ -258,7 +258,11 @@ export default function BookingPage() {
     // reset modal
     setOpenModal(false);
   };
-
+  const convertTo12Hour = (h: any) => {
+    if (h === 0) return 12;
+    if (h > 12) return h - 12;
+    return h;
+  };
   const handlePersonTypeChange = (
     personIndex: number,
     type: "Adult" | "Child"
@@ -860,46 +864,143 @@ export default function BookingPage() {
 
       case 2:
         return (
-          <div className="space-y-6 step-content">
-            <div className="text-center mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6">
-              <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent flex items-center justify-center gap-2 mx-auto">
-                <Calendar className="h-8 w-8" />
+          <div className="space-y-10 step-content max-w-2xl mx-auto">
+            {/* Title */}
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-primary mb-3">
                 Choose Date & Time
               </h2>
+              <p className="text-lg text-muted-foreground">
+                First pick a date, then choose your time
+              </p>
             </div>
-            <div className="p-4 bg-white rounded-xl shadow-sm border">
+
+            {/* Date Picker */}
+            <div className="bg-white rounded-3xl p-10 shadow-2xl border-2 border-gray-100">
+              <div className="text-center mb-8">
+                <Calendar className="h-14 w-14 text-primary mx-auto mb-4" />
+                <p className="text-xl font-bold text-gray-800">
+                  Step 1: Select Date
+                </p>
+              </div>
+
               <input
                 type="date"
-                className="w-full p-4 border-0 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl text-center text-lg font-semibold focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full p-6 text-2xl text-center font-bold bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-300 focus:border-primary focus:outline-none transition-all cursor-pointer"
                 value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, date: e.target.value, time: "" });
+                }}
               />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-white rounded-xl shadow-sm border">
-              {timeSlots.map((time) => (
-                <Button
-                  key={time}
-                  variant={formData.time === time ? "default" : "outline"}
-                  className={`h-12 rounded-xl transition-all duration-300 hover:shadow-md ${
-                    formData.time === time
-                      ? "bg-gradient-to-r from-primary to-primary/80 shadow-lg transform scale-105"
-                      : "hover:bg-primary/5 hover:border-primary/50"
-                  }`}
-                  onClick={(e) => {
-                    animateSelection(e.currentTarget as HTMLElement);
-                    setFormData({ ...formData, time });
-                  }}
-                >
-                  <Clock className="h-4 w-4 mr-2" />
-                  {time}
-                </Button>
-              ))}
-            </div>
+
+            {/* Time Picker - Only appears after date is selected */}
+            {formData.date ? (
+              <div className="bg-white rounded-3xl p-10 shadow-2xl border-2 border-gray-100 animate-fadeIn space-y-10">
+                <div className="text-center">
+                  <Clock className="h-14 w-14 text-green-600 mx-auto mb-4" />
+                  <p className="text-xl font-bold text-gray-800">
+                    Step 2: Choose Your Time
+                  </p>
+                </div>
+
+                {/* Modern Alarm-Style Wheel Time Picker */}
+                <div className="flex justify-center">
+                  <div className="flex gap-6 bg-gray-50 p-6 rounded-3xl border shadow-inner">
+                    {/* Hour Wheel */}
+                    <div className="flex flex-col items-center">
+                      <p className="text-xs font-medium mb-2 text-gray-500">
+                        Hour
+                      </p>
+                      <select
+                        className="w-20 h-32 text-center text-lg font-bold rounded-2xl border bg-white shadow-md overflow-y-scroll scrollbar-none"
+                        size={5}
+                        value={formData.time.split(":")[0] || ""}
+                        onChange={(e) => {
+                          const hour = e.target.value;
+                          const min = formData.time.split(":")[1] || "00";
+                          setFormData({ ...formData, time: `${hour}:${min}` });
+                        }}
+                      >
+                        {Array.from({ length: 15 }).map((_, h) => (
+                          <option key={h} value={String(h).padStart(2, "0")}>
+                            {convertTo12Hour(h)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Minute Wheel */}
+                    <div className="flex flex-col items-center">
+                      <p className="text-xs font-medium mb-2 text-gray-500">
+                        Minute
+                      </p>
+                      <select
+                        className="w-20 h-32 text-center text-lg font-bold rounded-2xl border bg-white shadow-md overflow-y-scroll scrollbar-none"
+                        size={5}
+                        value={formData.time.split(":")[1] || ""}
+                        onChange={(e) => {
+                          const min = e.target.value;
+                          const hour = formData.time.split(":")[0] || "00";
+                          setFormData({ ...formData, time: `${hour}:${min}` });
+                        }}
+                      >
+                        {["00", "15", "30", "45"].map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* OR Quick Time Buttons */}
+                <div className="grid grid-cols-2 gap-5 pt-6">
+                  {[
+                    { time: "02:00", label: "2:00 Morning" },
+                    { time: "09:00", label: "9:00 Morning" },
+                    { time: "09:30", label: "9:30 Morning" },
+                    { time: "10:00", label: "10:00 Morning" },
+                    { time: "11:00", label: "11:00 Morning" },
+                    { time: "14:00", label: "2:00 Afternoon" },
+                    { time: "15:00", label: "3:00 Afternoon" },
+                    { time: "16:00", label: "4:00 Afternoon" },
+                    { time: "17:00", label: "5:00 Evening" },
+                    { time: "18:00", label: "6:00 Evening" },
+                    { time: "19:00", label: "7:00 Evening" },
+                  ].map(({ time, label }) => (
+                    <Button
+                      key={time}
+                      variant={formData.time === time ? "default" : "outline"}
+                      size="lg"
+                      className={`h-20 text-xs font-bold rounded-3xl transition-all shadow-md ${
+                        formData.time === time
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white scale-105 shadow-xl"
+                          : "border-2 hover:border-primary hover:bg-primary/5"
+                      }`}
+                      onClick={() => setFormData({ ...formData, time })}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // ⛔ NO DATE SELECTED
+              <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-300">
+                <Clock className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+                <p className="text-2xl font-bold text-gray-500">
+                  Please select a date first
+                </p>
+                <p className="text-lg text-gray-400 mt-3">
+                  Then you can choose your time
+                </p>
+              </div>
+            )}
           </div>
         );
-
       case 3:
         return (
           <div className="space-y-6 step-content text-center">
